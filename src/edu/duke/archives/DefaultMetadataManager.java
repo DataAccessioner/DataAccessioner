@@ -1,7 +1,7 @@
 package edu.duke.archives;
 
 import edu.duke.archives.interfaces.MetadataManager;
-import edu.duke.archives.metadata.Metadata;
+import edu.duke.archives.metadata.FileWrapper;
 import edu.duke.archives.metadata.QualifiedMetadata;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -9,11 +9,12 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.sql.Timestamp;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import org.apache.commons.lang.NullArgumentException;
 import org.jdom.Document;
 import org.jdom.Element;
-import org.jdom.Namespace;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
@@ -23,52 +24,16 @@ import org.jdom.xpath.XPath;
  *
  * @author Seth Shaw
  */
-public class DefaultMetadataManager implements MetadataManager{
-private static File xmlFile;
-    private static Document document;
-    private static Element accessionElement;
-    private static Element currentElement;
-    private static Namespace DC_NAMESPACE = Namespace.getNamespace("dc",
-            "http://purl.org/dc/elements/1.1/");
-    private static boolean isRunning = false;
-    private static List<Object> toolAdapters = new ArrayList<Object>();
+public class DefaultMetadataManager implements MetadataManager {
 
-    public void init(String filePath,
-            String collectionName,
-            String accessionNumber) throws Exception {
-        try {
-            xmlFile = new File(filePath);
-            xmlFile.getParentFile().mkdirs(); //In case it doesn't exist
-            try {
-                document = new SAXBuilder().build(xmlFile);
-                accessionElement = (Element) (XPath.selectSingleNode(document,
-                        "//collection/accession"));
-                currentElement = accessionElement;
-            } catch (Exception e) {
-                if (xmlFile.length() == 0) {
-                    System.err.println("File was probably empty");
-                } else {
-                    System.err.println("Exisiting accession doc contains an " +
-                            "error. Results will be saved to a supplementary " +
-                            "accession record file.");
-                    //Temp file functionality allows creating a unique name
-                    xmlFile = File.createTempFile(accessionNumber + "_",
-                            ".xml", xmlFile.getParentFile());
-                }
-                document = startDoc(collectionName, accessionNumber);
-            }
-            isRunning = true;
+    File xmlFile;
+    Document document;
+    Element accessionElement;
+    public Element currentElement;
+    boolean isRunning = false;
+    public List desiredChecksums;
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
-        }
-
-    }
-
-    private static Document startDoc(String collectionName,
-            String accessionNumber) {
-        System.out.println("\tCreating the document");
+    private Document startDoc(String collectionName, String accessionNumber) {
         Element collection = new Element("collection");
         collection.setAttribute("name", collectionName);
         document = new Document(collection);
@@ -93,7 +58,6 @@ private static File xmlFile;
             stream.close();
         }
         cancel();
-        System.out.println("Metadata Manager closed.");
     }
 
     public boolean isRunning() {
@@ -108,11 +72,10 @@ private static File xmlFile;
         currentElement = null;
         document.removeContent();
         document = null;
-        toolAdapters = new ArrayList<Object>();
         System.gc();
     }
 
-    public void recordFile(Metadata file) {
+    public void recordFile(FileWrapper file) {
         startFile(file);
         endFile();
     }
@@ -122,7 +85,7 @@ private static File xmlFile;
         endFile();
     }
 
-    public void startFile(Metadata metadata) {
+    public void startFile(FileWrapper metadata) {
         Element file = new Element("file");
         currentElement.addContent(file);
         currentElement = file;
@@ -136,15 +99,21 @@ private static File xmlFile;
         }
         if (metadata.isFile()) {
             file.setAttribute("size", String.valueOf(metadata.length()));
-            if ((metadata.getMD5() != null) && !(metadata.getMD5().equals(""))) {
-                file.setAttribute("MD5", metadata.getMD5());
+
+            //Checksums
+            java.util.Map<String, String> checksums = metadata.getChecksums();
+            for (String key : checksums.keySet()) {
+                String value = (String) checksums.get(key);
+                if ((value != null) && (desiredChecksums.contains(key))) {
+                    file.setAttribute(key, value);
+                }
             }
         }
         addQM(metadata.getQualifiedMetadata());
     }
 
     public void startFile(String path) {
-        startFile(new Metadata(path));
+        startFile(new FileWrapper(path));
     }
 
     public void endFile() {
@@ -152,13 +121,11 @@ private static File xmlFile;
         endDirectory();
     }
 
-    public void startDirectory(Metadata directory) {
+    public void startDirectory(FileWrapper directory) {
         Element newDir = new Element("folder");
         newDir.setAttribute("name", directory.getNewName());
-
         String last_modified = new Timestamp(directory.lastModified()).toString();
         newDir.setAttribute("last_modified", last_modified);
-
         if (directory.isHidden()) {
             newDir.setAttribute("hidden", "true");
         }
@@ -171,7 +138,7 @@ private static File xmlFile;
     }
 
     public void startDirectory(String path) {
-        startDirectory(new Metadata(path));
+        startDirectory(new FileWrapper(path));
     }
 
     public void endDirectory() {
@@ -181,7 +148,7 @@ private static File xmlFile;
     }
 
     public void addXML(String xml) {
-        if (xml.matches("")){
+        if (xml.matches("")) {
             return;
         }
         try {
@@ -196,11 +163,7 @@ private static File xmlFile;
         }
     }
 
-    public boolean implementsMetadataManager() {
-        return true;
-    }
-
-    private void addQM(List<QualifiedMetadata> qms) {
+    public void addQM(List<QualifiedMetadata> qms) {
         if (qms == null || qms.isEmpty()) //Nothing to give
         {
             return;
@@ -214,37 +177,69 @@ private static File xmlFile;
             currentElement.addContent(element);
         }
     }
-    
+
     public void addNote(String note) {
-        addXML("<note>"+note+"</note>");
+        addXML("<note>" + note + "</note>");
     }
 
     public String getName() {
         return "Default Manager";
     }
 
-    public void init() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void init(DataMigrator migrator) throws Exception {
+    public void init(DataAccessioner migrator) throws Exception {
         String collection = "";
         String accessionNo = "no_accession";
-        List<QualifiedMetadata> sourceQM = migrator.getSource().getQualifiedMetadata();
-        for(QualifiedMetadata qm : sourceQM){
+        List<QualifiedMetadata> sourceQM = migrator.getSource().
+                getQualifiedMetadata();
+        for (QualifiedMetadata qm : sourceQM) {
             if (qm.getElement().equalsIgnoreCase("title") && qm.getQualifier().
                     equalsIgnoreCase("collection")) {
                 collection = qm.getValue();
                 sourceQM.remove(qm);
-            }
-            else if (qm.getElement().equalsIgnoreCase("identifier") && qm.getQualifier().
+            } else if (qm.getElement().equalsIgnoreCase("identifier") && qm.
+                    getQualifier().
                     equalsIgnoreCase("accession_no")) {
                 accessionNo = qm.getValue();
                 sourceQM.remove(qm);
             }
         }
         
-        File destination_xml = new File(migrator.getDestination(), accessionNo+".xml");
-        init(destination_xml.getAbsolutePath(), collection, accessionNo);
+        desiredChecksums = migrator.config.getList("DefaultMetadataManager.checksums", Arrays.asList(new String[]{"MD5","CRC32","SHA-256"}));
+
+        /*Setting these properties allows us to interpolate them into the
+         writepath whether we use one set by the users or the default one.*/
+        migrator.config.setProperty("DefaultMetadataManager.destination", migrator.getDestination().getAbsolutePath());
+        migrator.config.setProperty("DefaultMetadataManager.accession.number", accessionNo);
+        migrator.config.setProperty("DefaultMetadataManager.collection.name", collection);
+        migrator.config.setProperty("DefaultMetadataManager.disk.name", migrator.getSource().getNewName());
+
+        //Set destination for the metadata output file
+        String path = migrator.config.getString("DefaultMetadataManager.writepath", "${DefaultMetadataManager.destination}"+File.separator+ "${DefaultMetadataManager.accession.number}" + ".xml");
+        try {
+            xmlFile = new File(path);
+            xmlFile.getAbsoluteFile().getParentFile().mkdirs(); //In case it doesn't exist
+            try {
+                document = new SAXBuilder().build(xmlFile);
+                accessionElement = (Element) (XPath.selectSingleNode(document,
+                        "//collection/accession"));
+                currentElement = accessionElement;
+            } catch (Exception e) {
+                if (xmlFile.length() != 0) {
+                    System.err.println("Exisiting accession doc contains an " +
+                            "error. Results will be saved to a supplementary " +
+                            "accession record file.");
+                    //Temp file functionality allows creating a unique name
+                    xmlFile = File.createTempFile(accessionNo + "_",
+                            ".xml", xmlFile.getParentFile());
+                } // else the file was empty and we can still safely use it.
+                document = startDoc(collection, accessionNo);
+            }
+            isRunning = true;
+
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
 }

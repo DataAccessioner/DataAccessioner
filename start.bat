@@ -1,0 +1,1 @@
+java -Xmx256m -jar DataAccessioner.jar -plugins edu.duke.archives.migrator.plugins.managers.dukepremis,edu.duke.archives.migrator.plugins.adapters.jhove,edu.duke.archives.migrator.plugins.adapters.droid

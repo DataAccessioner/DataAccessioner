@@ -1,7 +1,12 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
 package edu.duke.archives;
 
 import edu.duke.archives.interfaces.MetadataManager;
-import edu.duke.archives.metadata.Metadata;
+import edu.duke.archives.metadata.FileWrapper;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -13,7 +18,7 @@ public class BlankMetadataManager implements MetadataManager {
 
     private boolean isRunning = false;
     
-    public void init(DataMigrator aThis) throws Exception {
+    public void init(DataAccessioner aThis) throws Exception {
         isRunning = true;
         return;
     }
@@ -47,7 +52,7 @@ public class BlankMetadataManager implements MetadataManager {
         }
     }
 
-    public void recordFile(Metadata file) {
+    public void recordFile(FileWrapper file) {
         return;
     }
 
@@ -55,7 +60,7 @@ public class BlankMetadataManager implements MetadataManager {
         return;
     }
 
-    public void startFile(Metadata file) {
+    public void startFile(FileWrapper file) {
         return;
     }
 
@@ -67,7 +72,7 @@ public class BlankMetadataManager implements MetadataManager {
         return;
     }
 
-    public void startDirectory(Metadata directory) {
+    public void startDirectory(FileWrapper directory) {
         return;
     }
 

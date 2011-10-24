@@ -259,9 +259,6 @@
               <SubComponents>
                 <Component class="javax.swing.JTree" name="fileTree">
                   <Properties>
-                    <Property name="model" type="javax.swing.tree.TreeModel" editor="org.netbeans.modules.form.ComponentChooserEditor">
-                      <ComponentRef name="null"/>
-                    </Property>
                     <Property name="name" type="java.lang.String" value="fileTree" noResource="true"/>
                   </Properties>
                 </Component>
@@ -611,6 +608,7 @@
   <AuxValues>
     <AuxValue name="FormSettings_autoResourcing" type="java.lang.Integer" value="2"/>
     <AuxValue name="FormSettings_autoSetComponentName" type="java.lang.Boolean" value="true"/>
+    <AuxValue name="FormSettings_generateFQN" type="java.lang.Boolean" value="true"/>
     <AuxValue name="FormSettings_generateMnemonicsCode" type="java.lang.Boolean" value="false"/>
     <AuxValue name="FormSettings_i18nAutoMode" type="java.lang.Boolean" value="false"/>
     <AuxValue name="FormSettings_layoutCodeTarget" type="java.lang.Integer" value="2"/>

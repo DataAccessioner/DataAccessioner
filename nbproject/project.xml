@@ -14,7 +14,7 @@
             </test-roots>
         </data>
         <swingapp xmlns="http://www.netbeans.org/ns/form-swingapp/1">
-            <application-class name="edu.duke.archives.DataAccessioner"/>
+            <application-class name="edu.duke.archives.DataAccessionerApp"/>
         </swingapp>
     </configuration>
 </project>

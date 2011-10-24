@@ -1,4 +1,4 @@
-<?xml version="1.0" ?>
+﻿<?xml version="1.0" ?>
 <!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
 <plugin id="edu.duke.archives.migrator.plugins.managers.dukepremis" version="0.1.0">
     <requires>

@@ -3,42 +3,44 @@ package edu.duke.archives.metadata;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 
 /**
  *
  * @author Seth Shaw
  */
-public class Metadata extends File {
+public class FileWrapper extends File {
 
-    private Metadata parentMetadata;
+    private FileWrapper parentMetadata;
     private String newName = null;
-    private TreeMap<String, Metadata> childrenMetadata;
-    private String md5;
+    private TreeMap<String, FileWrapper> childrenMetadata;
+    private Map<String, String> checksums = new TreeMap<String, String>();
     private ArrayList<QualifiedMetadata> qualifiedMetadata =
             new ArrayList<QualifiedMetadata>();
+    
 
     private boolean excluded = false; //Include by default
 
-    public Metadata(String pathname) {
+    public FileWrapper(String pathname) {
         super(pathname);
     }
 
-    public Metadata(String pathname, boolean excluded) {
+    public FileWrapper(String pathname, boolean excluded) {
         super(pathname);
         setExcluded(excluded);
     }
 
-    public Metadata(Metadata metadata, String child) {
+    public FileWrapper(FileWrapper metadata, String child) {
         super(metadata, child);
         this.parentMetadata = metadata;
         //By default set child to parent's exclude setting
         this.setExcluded(metadata.excluded);
     }
 
-    public Metadata(File parent, String child) {
+    public FileWrapper(File parent, String child) {
         super(parent, child);
-        this.parentMetadata = (Metadata) parent;
+        this.parentMetadata = (FileWrapper) parent;
     }
 
     public void addQualifiedMetadata(String namespace, String element, String qualifier, String value) {
@@ -49,18 +51,32 @@ public class Metadata extends File {
         qualifiedMetadata.add(new QualifiedMetadata(null, element, qualifier, value));
     }
 
+    public Map getChecksums(){
+        return checksums;
+    }
+    
+    public String getChecksum(String algorithm){
+        return (checksums.get(algorithm) == null) ? "" : (String) checksums.get(algorithm);
+    }
+    
     /**
      * @return the MD5
      */
+    @Deprecated
     public String getMD5() {
-        return md5;
+        return (checksums.get("MD5") == null)? "" : (String) checksums.get("MD5");
     }
 
+    public void setChecksum(String algorithm, String value){
+        checksums.put(algorithm, value);
+    }
+    
     /**
      * @param md5 the MD5 to set
      */
+    @Deprecated
     public void setMD5(String md5) {
-        this.md5 = md5;
+        checksums.put("MD5", md5);
     }
 
 
@@ -81,37 +97,37 @@ public class Metadata extends File {
         return this.excluded;
     }
 
-    protected void setParentMetadata(Metadata parentMetadata) {
+    protected void setParentMetadata(FileWrapper parentMetadata) {
         this.parentMetadata = parentMetadata;
     }
 
-    public Metadata[] listMetadata() {
+    public FileWrapper[] listMetadata() {
         String[] childrenList = list();
         if (childrenList.length != getChildrenMetadata().values().size()) {
             //Add any children unaccounted for
-            TreeMap<String, Metadata> newChildMetadata = new TreeMap<String, Metadata>();
+            TreeMap<String, FileWrapper> newChildMetadata = new TreeMap<String, FileWrapper>();
             for (int i = 0; i < childrenList.length; i++) {
                 if (childrenMetadata.containsKey(childrenList[i])) {
                     newChildMetadata.put(childrenList[i], childrenMetadata.get(childrenList[i]));
                 } else {
-                    Metadata childM = new Metadata(this, childrenList[i]);
+                    FileWrapper childM = new FileWrapper(this, childrenList[i]);
                     newChildMetadata.put(childM.getName(), childM);
                 }
             }
             //Remove any qualifiedMetadata children not listed
             childrenMetadata = newChildMetadata;
         }
-        return childrenMetadata.values().toArray(new Metadata[childrenMetadata.size()]);
+        return childrenMetadata.values().toArray(new FileWrapper[childrenMetadata.size()]);
     }
 
-    protected TreeMap<String, Metadata> getChildrenMetadata() {
+    protected TreeMap<String, FileWrapper> getChildrenMetadata() {
         if (childrenMetadata == null){
-            childrenMetadata = new TreeMap<String, Metadata>();
+            childrenMetadata = new TreeMap<String, FileWrapper>();
         }
         return childrenMetadata;
     }
 
-    protected void setChildrenMetadata(TreeMap<String, Metadata> childrenMetadata) {
+    protected void setChildrenMetadata(TreeMap<String, FileWrapper> childrenMetadata) {
         this.childrenMetadata = childrenMetadata;
     }
 
@@ -158,10 +174,10 @@ public class Metadata extends File {
     public synchronized boolean deleteRecursively() {
         parentMetadata = null;
         qualifiedMetadata = null;
-        md5 = null;
+        checksums.remove("MD5");
         if (this.isDirectory()) {
             for (String path : childrenMetadata.keySet()) {
-                Metadata child = childrenMetadata.remove(path);
+                FileWrapper child = childrenMetadata.remove(path);
                 if (!child.deleteRecursively()) {
                     return false;
                 }

@@ -5,10 +5,12 @@ package edu.duke.archives;
 
 import edu.duke.archives.interfaces.Adapter;
 import edu.duke.archives.interfaces.MetadataManager;
-import edu.duke.archives.metadata.Metadata;
+import edu.duke.archives.metadata.FileWrapper;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.event.ItemEvent;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,6 +37,7 @@ import java.util.regex.Pattern;
 import javax.swing.ButtonGroup;
 import javax.swing.Timer;
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -62,6 +65,8 @@ public class DataAccessionerView extends FrameView {
     public DataAccessionerView(SingleFrameApplication app) {
         super(app);
 
+        this.getFrame().setIconImage(Toolkit.getDefaultToolkit().getImage(this.getClass().
+                getResource("resources/disk.gif")));
         initComponents();
 
         // status bar initialization - message timeout, idle icon and busy animation, etc
@@ -160,29 +165,26 @@ public class DataAccessionerView extends FrameView {
     @Action
     public void showAboutBox() {
         if (aboutBox == null) {
-            JFrame mainFrame = DataAccessioner.getApplication().getMainFrame();
+            JFrame mainFrame = DataAccessionerApp.getApplication().getMainFrame();
             aboutBox = new DataAccessionerAboutBox(mainFrame);
             aboutBox.setLocationRelativeTo(mainFrame);
         }
-        DataAccessioner.getApplication().show(aboutBox);
+        DataAccessionerApp.getApplication().show(aboutBox);
     }
 
-    void setMigrator(DataMigrator migrator) {
+    void setMigrator(DataAccessioner migrator) {
         this.migrator = migrator;
         
-        //Metadata Managers
+        //FileWrapper Managers
         mmMenu.removeAll();
         MetadataManagerMenuActionListener mmmal =
                 new MetadataManagerMenuActionListener();
         ButtonGroup group = new ButtonGroup();
-        boolean selected = true;
         for (MetadataManager mm : migrator.getAvailableManagers()) {
             rbMenuItem = new JRadioButtonMenuItem(mm.getName());
             try {
-                if (selected) {
-                    migrator.setMetadataManager(mm);
-                    rbMenuItem.setSelected(selected);
-                    selected = false;
+                if (mm.equals(migrator.getMetadataManager())) {
+                    rbMenuItem.setSelected(true);
                 }
             } catch (Exception ex) {
                 Logger.getLogger(DataAccessionerView.class.getName()).
@@ -207,8 +209,8 @@ public class DataAccessionerView extends FrameView {
         }
     }
 
-    private Metadata getSourceMetadata() {
-        return (Metadata) fileTree.getModel().getRoot();
+    private FileWrapper getSourceMetadata() {
+        return (FileWrapper) fileTree.getModel().getRoot();
     }
 
     /** This method is called from within the constructor to
@@ -273,7 +275,7 @@ public class DataAccessionerView extends FrameView {
 
         accessionInfo.setName("accessionInfo"); // NOI18N
 
-        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(edu.duke.archives.DataAccessioner.class).getContext().getResourceMap(DataAccessionerView.class);
+        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(edu.duke.archives.DataAccessionerApp.class).getContext().getResourceMap(DataAccessionerView.class);
         nameLbl.setText(resourceMap.getString("nameLbl.text")); // NOI18N
         nameLbl.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
         nameLbl.setName("nameLbl"); // NOI18N
@@ -285,7 +287,7 @@ public class DataAccessionerView extends FrameView {
         collTitleLbl.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
         collTitleLbl.setName("collTitleLbl"); // NOI18N
 
-        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(edu.duke.archives.DataAccessioner.class).getContext().getActionMap(DataAccessionerView.class, this);
+        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(edu.duke.archives.DataAccessionerApp.class).getContext().getActionMap(DataAccessionerView.class, this);
         accnDirBtn.setAction(actionMap.get("setAccessionDir")); // NOI18N
         accnDirBtn.setText(resourceMap.getString("accnDirBtn.text")); // NOI18N
         accnDirBtn.setName("accnDirBtn"); // NOI18N
@@ -586,6 +588,7 @@ public class DataAccessionerView extends FrameView {
         setMenuBar(menuBar);
         setStatusBar(statusPanel);
     }// </editor-fold>//GEN-END:initComponents
+
     @Action
     public void clearDisk() {
         fileTree = null;
@@ -602,17 +605,17 @@ public class DataAccessionerView extends FrameView {
             @Override
             public String convertValueToText(Object value, boolean selected,
                     boolean expanded, boolean leaf, int row, boolean hasFocus) {
-                String returned = ((Metadata) value).getName();
+                String returned = ((FileWrapper) value).getName();
                 if (leaf) {
                     if (displaySize) {
                         returned +=
                                 " (" +
-                                prettySize(((Metadata) value).length()) + ")";
+                                prettySize(((FileWrapper) value).length()) + ")";
                     }
                     if (displayLastModified) {
                         returned +=
                                 " [" +
-                                dateFormat.format(new Date(((Metadata) value).lastModified())) + "]";
+                                dateFormat.format(new Date(((FileWrapper) value).lastModified())) + "]";
                     }
                 }
                 return returned;
@@ -639,7 +642,7 @@ public class DataAccessionerView extends FrameView {
                         expanded, leaf, row,
                         hasFocus);
 
-                Metadata nodeInfo = (Metadata) value;
+                FileWrapper nodeInfo = (FileWrapper) value;
 
                 //Set ToolTip
                 if (nodeInfo.isDirectory()) {
@@ -787,7 +790,7 @@ public class DataAccessionerView extends FrameView {
         protected Object doInBackground() {
             setMessage("Preparing migration ...");
             //Add some metadata
-            Metadata source = getSourceMetadata();
+            FileWrapper source = getSourceMetadata();
             source.addQualifiedMetadata("note", null, diskName.getText() +
                     " transfered by " + name.getText() + " on " +
                     new Date(System.currentTimeMillis()).toString());
@@ -804,9 +807,9 @@ public class DataAccessionerView extends FrameView {
             source.addQualifiedMetadata("title", "collection",
                     collTitle.getText());
             source.setNewName(diskName.getText());
-            migrator.setSourceDirectory(source);
+            migrator.setSource(source);
             //Set destination dir
-            migrator.setDestinationDir(new File(accnDir.getText(),
+            migrator.setDestination(new File(accnDir.getText(),
                     accnNo.getText()));
 
             //Run migrator
@@ -960,8 +963,8 @@ public class DataAccessionerView extends FrameView {
         TreePath[] currentSelections = fileTree.getSelectionPaths();
         for (TreePath currentSelection : currentSelections) {
             if (currentSelection != null) {
-                Metadata currentNode =
-                        (Metadata) currentSelection.getLastPathComponent();
+                FileWrapper currentNode =
+                        (FileWrapper) currentSelection.getLastPathComponent();
                 currentNode.setExcluded(exclude);
                 if (exclude) {
                     fileTree.collapsePath(currentSelection);
@@ -1080,7 +1083,7 @@ public class DataAccessionerView extends FrameView {
 
     public class FileSystemModel implements TreeModel, Serializable {
 
-        Metadata root;
+        FileWrapper root;
         private Vector<TreeModelListener> treeModelListeners =
                 new Vector<TreeModelListener>();
 
@@ -1089,36 +1092,29 @@ public class DataAccessionerView extends FrameView {
         }
 
         public FileSystemModel(String startPath) {
-            root = new Metadata(startPath);
+            root = new FileWrapper(startPath);
         }
 
-        public Metadata getRoot() {
+        public FileWrapper getRoot() {
             return root;
         }
 
-        public Metadata getChild(Object parent, int index) {
-            Metadata directory = (Metadata) parent;
+        public FileWrapper getChild(Object parent, int index) {
+            FileWrapper directory = (FileWrapper) parent;
             return directory.listMetadata()[index];
         }
 
         public int getChildCount(Object parent) {
-            try {
-                Metadata fileSysEntity = (Metadata) parent;
-                if (fileSysEntity.isDirectory()) {
-                    return fileSysEntity.listMetadata().length;
-                } else {
-                    return 0;
-                }
-            } catch (Exception e) {
-                //If anything goes wrong, assume zero but still report.
-                System.err.println("Could not list children of " + parent);
-                e.printStackTrace();
+            FileWrapper fileSysEntity = (FileWrapper) parent;
+            if (fileSysEntity.isDirectory()) {
+                return fileSysEntity.listMetadata().length;
+            } else {
                 return 0;
             }
         }
 
         public boolean isLeaf(Object node) {
-            return ((Metadata) node).isFile();
+            return ((FileWrapper) node).isFile();
         }
 
         public void valueForPathChanged(TreePath path, Object newValue) {
@@ -1126,9 +1122,9 @@ public class DataAccessionerView extends FrameView {
         }
 
         public int getIndexOfChild(Object parent, Object child) {
-            Metadata directory = (Metadata) parent;
-            Metadata fileSysEntity = (Metadata) child;
-            Metadata[] children = directory.listMetadata();
+            FileWrapper directory = (FileWrapper) parent;
+            FileWrapper fileSysEntity = (FileWrapper) child;
+            FileWrapper[] children = directory.listMetadata();
 
             for (int i = 0; i < children.length; ++i) {
                 if (fileSysEntity.getName().equals(children[i].getName())) {
@@ -1289,6 +1285,6 @@ public class DataAccessionerView extends FrameView {
     private boolean displayLastModified = false;
     private JDialog aboutBox;
     private Icon excludeIcon,  fileIcon,  folderIcon,  excludeHiddenIcon,  fileHiddenIcon,  folderHiddenIcon;
-    private DataMigrator migrator = null;
+    private DataAccessioner migrator = null;
     private MigrateTask currentMigration = null;
 }

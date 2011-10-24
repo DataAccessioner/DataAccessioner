@@ -1,27 +1,31 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
 package edu.duke.archives.interfaces;
 
-import edu.duke.archives.DataMigrator;
-import edu.duke.archives.metadata.Metadata;
+import edu.duke.archives.DataAccessioner;
+import edu.duke.archives.metadata.FileWrapper;
 
 /**
  *
- * @author Seth Shaw
+ * @author seths
  */
 public interface MetadataManager {
-    public void init(DataMigrator aThis) throws Exception;
+    public void init(DataAccessioner aThis) throws Exception;
     String getName();
-    void init(String filePath, String collectionName, String accessionNumber) throws Exception;
     void close() throws Exception;
     boolean isRunning();
     void cancel();
     
-    void recordFile(Metadata file);
+    void recordFile(FileWrapper file);
     void recordFile(String path);
-    void startFile(Metadata file);
+    void startFile(FileWrapper file);
     void startFile(String path);
     void endFile();
     
-    void startDirectory(Metadata directory);
+    void startDirectory(FileWrapper directory);
     void startDirectory(String path);
     void endDirectory();
 
