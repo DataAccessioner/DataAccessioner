@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="DataAccessioner_plugin" default="default" basedir=".">
+    <description>Builds, tests, and runs the project DataAccessioner_plugin.</description>
+    <import file="nbproject/build-impl.xml"/>
+    <target name="-post-jar">
+        <jar update="true" destfile="${dist.jar}">
+            <zipfileset src="lib/appframework-1.0.3.jar"/>
+            <zipfileset src="lib/commons-logging.jar" />
+            <zipfileset src="lib/jaxen-core.jar" />
+            <zipfileset src="lib/jaxen-jdom.jar" />
+            <zipfileset src="lib/jdom.jar" />
+            <zipfileset src="lib/jpf.jar" />
+            <zipfileset src="lib/saxpath.jar" />
+            <zipfileset src="lib/swing-layout-1.0.3.jar" />
+            <zipfileset src="lib/swing-worker-1.1.jar" />
+            <fileset file="license.txt" />
+        </jar>
+    </target>
+</project>
