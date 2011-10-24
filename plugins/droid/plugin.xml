@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
+<plugin id="edu.duke.archives.migrator.plugins.adapters.droid" version="0.1.0">
+    <requires>
+        <import plugin-id="edu.duke.archives.migrator.plugins.core"/>
+    </requires>
+    <runtime>
+        <library id="core" path="classes/" type="code" />
+        <library id="droid" path="droid.jar" type="code" />
+        <library id="droid-lib" path="lib/AllLibraries.jar" type="code" />
+        <library id="droid-conf" path="DROID_config.xml" type="resources" />
+        <library id="droid-sigs" path="DROID_SignatureFile.xml" type="resources" />
+    </runtime>
+    <extension plugin-id="edu.duke.archives.migrator.plugins.core" point-id="Adapter" id="droid">
+		<parameter id="class" value="edu.duke.archives.migrator.plugins.adapters.DroidAdapter"/>
+		<parameter id="name" value="Droid Adapter"/>
+        <parameter id="description" value="An adapter for Droid."/>
+	</extension>
+</plugin>

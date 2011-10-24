@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- You may freely edit this file. See commented blocks below for -->
+<!-- some examples of how to customize the build. -->
+<!-- (If you delete it and reopen the project it will be recreated.) -->
+<project name="DA_plugins_core" default="default" basedir=".">
+    <description>Builds, tests, and runs the project DA_plugins_core.</description>
+    <import file="nbproject/build-impl.xml"/>
+    <target name="-post-jar">
+        <zip destfile="dist/edu.duke.archives.migrator.plugins.core.zip">
+            <fileset dir="build" />
+            <fileset file="plugin.xml" />
+            <fileset file="license.txt" />
+        </zip>
+    </target>
+</project>
