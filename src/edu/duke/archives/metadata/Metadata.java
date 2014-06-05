@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
+import org.jdom.Element;
+import org.jdom.Namespace;
 
 /**
  *
@@ -15,8 +17,11 @@ public class Metadata extends File {
     private String newName = null;
     private TreeMap<String, Metadata> childrenMetadata;
     private String md5;
-    private ArrayList<QualifiedMetadata> qualifiedMetadata =
-            new ArrayList<QualifiedMetadata>();
+    private ArrayList<Element> qualifiedMetadata =
+            new ArrayList<Element>();
+    private static final Namespace DC_NAMESPACE = Namespace.getNamespace("dc",
+            "http://purl.org/dc/elements/1.1/");
+    private static final Namespace DEFAULT_NAMESPACE = Namespace.getNamespace("http://dataaccessioner.org/schema/dda-0-3-1");
 
     private boolean excluded = false; //Include by default
 
@@ -41,12 +46,20 @@ public class Metadata extends File {
         this.parentMetadata = (Metadata) parent;
     }
 
-    public void addQualifiedMetadata(String namespace, String element, String qualifier, String value) {
-        qualifiedMetadata.add(new QualifiedMetadata(namespace, element, qualifier, value));
+    public void addQualifiedMetadata(Namespace namespace, String element, String qualifier, String value) {
+        if(element == null){ return; }
+        Element qm = new Element(element, namespace);
+        if(qualifier != null){
+        qm.setAttribute("qualifier", qualifier);
+        }
+        if(value != null){
+        qm.addContent(value);
+        }
+        qualifiedMetadata.add(qm);
     }
 
     public void addQualifiedMetadata(String element, String qualifier, String value) {
-        qualifiedMetadata.add(new QualifiedMetadata(null, element, qualifier, value));
+        addQualifiedMetadata(DEFAULT_NAMESPACE, element, qualifier, value);
     }
 
     /**
@@ -115,7 +128,7 @@ public class Metadata extends File {
         this.childrenMetadata = childrenMetadata;
     }
 
-    public List<QualifiedMetadata> getQualifiedMetadata() {
+    public List<Element> getQualifiedMetadata() {
         return this.qualifiedMetadata;
     }
     

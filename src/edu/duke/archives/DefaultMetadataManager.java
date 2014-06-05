@@ -2,14 +2,15 @@ package edu.duke.archives;
 
 import edu.duke.archives.interfaces.MetadataManager;
 import edu.duke.archives.metadata.Metadata;
-import edu.duke.archives.metadata.QualifiedMetadata;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringReader;
-import java.sql.Timestamp;
-import java.util.ArrayList;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -24,15 +25,14 @@ import org.jdom.xpath.XPath;
  * @author Seth Shaw
  */
 public class DefaultMetadataManager implements MetadataManager{
-private static File xmlFile;
+    private static File xmlFile;
     private static Document document;
     private static Element accessionElement;
     private static Element currentElement;
-    private static Namespace DC_NAMESPACE = Namespace.getNamespace("dc",
-            "http://purl.org/dc/elements/1.1/");
+    private static final Namespace DEFAULT_NAMESPACE = Namespace.getNamespace("http://dataaccessioner.org/schema/dda-0-3-1");
     private static boolean isRunning = false;
-    private static List<Object> toolAdapters = new ArrayList<Object>();
-
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+               
     public void init(String filePath,
             String collectionName,
             String accessionNumber) throws Exception {
@@ -41,9 +41,8 @@ private static File xmlFile;
             xmlFile.getParentFile().mkdirs(); //In case it doesn't exist
             try {
                 document = new SAXBuilder().build(xmlFile);
-                accessionElement = (Element) (XPath.selectSingleNode(document,
-                        "//collection/accession"));
-                currentElement = accessionElement;
+                currentElement = document.getRootElement()
+                        .getChild("accession", DEFAULT_NAMESPACE);
             } catch (Exception e) {
                 if (xmlFile.length() == 0) {
                     System.err.println("File was probably empty");
@@ -69,10 +68,10 @@ private static File xmlFile;
     private static Document startDoc(String collectionName,
             String accessionNumber) {
         System.out.println("\tCreating the document");
-        Element collection = new Element("collection");
+        Element collection = new Element("collection", DEFAULT_NAMESPACE);
         collection.setAttribute("name", collectionName);
         document = new Document(collection);
-        accessionElement = new Element("accession");
+        accessionElement = new Element("accession", DEFAULT_NAMESPACE);
         accessionElement.setAttribute("number", accessionNumber);
         collection.addContent(accessionElement);
         currentElement = accessionElement;
@@ -108,7 +107,6 @@ private static File xmlFile;
         currentElement = null;
         document.removeContent();
         document = null;
-        toolAdapters = new ArrayList<Object>();
         System.gc();
     }
 
@@ -123,12 +121,12 @@ private static File xmlFile;
     }
 
     public void startFile(Metadata metadata) {
-        Element file = new Element("file");
+        Element file = new Element("file", DEFAULT_NAMESPACE);
         currentElement.addContent(file);
         currentElement = file;
         file.setAttribute("name", metadata.getNewName());
 
-        String last_modified = new Timestamp(metadata.lastModified()).toString();
+        String last_modified = DATE_FORMAT.format(new Date(metadata.lastModified()));
         file.setAttribute("last_modified", last_modified);
 
         if (metadata.isHidden() == true) {
@@ -153,10 +151,10 @@ private static File xmlFile;
     }
 
     public void startDirectory(Metadata directory) {
-        Element newDir = new Element("folder");
+        Element newDir = new Element("folder", DEFAULT_NAMESPACE);
         newDir.setAttribute("name", directory.getNewName());
 
-        String last_modified = new Timestamp(directory.lastModified()).toString();
+        String last_modified = DATE_FORMAT.format(new Date(directory.lastModified()));
         newDir.setAttribute("last_modified", last_modified);
 
         if (directory.isHidden()) {
@@ -200,18 +198,13 @@ private static File xmlFile;
         return true;
     }
 
-    private void addQM(List<QualifiedMetadata> qms) {
+    private void addQM(List<Element> qms) {
         if (qms == null || qms.isEmpty()) //Nothing to give
         {
             return;
         }
-        for (QualifiedMetadata qm : qms) {
-            Element element = new Element(qm.getElement());
-            if (qm.getQualifier() != null) {
-                element.setAttribute("qualifier", qm.getQualifier());
-            }
-            element.addContent(qm.getValue());
-            currentElement.addContent(element);
+        for (Element qm : qms) {
+            currentElement.addContent(qm);
         }
     }
     
@@ -230,17 +223,22 @@ private static File xmlFile;
     public void init(DataMigrator migrator) throws Exception {
         String collection = "";
         String accessionNo = "no_accession";
-        List<QualifiedMetadata> sourceQM = migrator.getSource().getQualifiedMetadata();
-        for(QualifiedMetadata qm : sourceQM){
-            if (qm.getElement().equalsIgnoreCase("title") && qm.getQualifier().
-                    equalsIgnoreCase("collection")) {
+        List<Element> sourceQM = migrator.getSource().getQualifiedMetadata();
+        Iterator<Element> sqmI = sourceQM.iterator();
+        while(sqmI.hasNext()){
+            Element qm = sqmI.next();
+            
+            if(qm.getName().equalsIgnoreCase("title") 
+                    && qm.getAttribute("qualifier") != null 
+                    && qm.getAttributeValue("qualifier").equalsIgnoreCase("collection")){
                 collection = qm.getValue();
-                sourceQM.remove(qm);
+                sqmI.remove();
             }
-            else if (qm.getElement().equalsIgnoreCase("identifier") && qm.getQualifier().
-                    equalsIgnoreCase("accession_no")) {
+            else if(qm.getName().equalsIgnoreCase("identifier") 
+                    && qm.getAttribute("qualifier") != null 
+                    && qm.getAttributeValue("qualifier").equalsIgnoreCase("accession_no")){
                 accessionNo = qm.getValue();
-                sourceQM.remove(qm);
+                sqmI.remove();
             }
         }
         

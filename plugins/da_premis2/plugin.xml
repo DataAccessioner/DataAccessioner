@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
-<plugin id="edu.duke.archives.migrator.plugins.managers.dukepremis" version="0.1.0">
+<plugin id="edu.duke.archives.migrator.plugins.managers.dapremis" version="0.1.0">
     <requires>
         <import plugin-id="edu.duke.archives.migrator.plugins.core"/>
     </requires>
@@ -13,9 +13,9 @@
         <library id="jdom" path="lib/jdom.jar" type="code" />
         <library id="saxpath" path="lib/saxpath.jar" type="code" />
     </runtime>
-    <extension plugin-id="edu.duke.archives.migrator.plugins.core" point-id="MetadataManager" id="dukePremis">
+    <extension plugin-id="edu.duke.archives.migrator.plugins.core" point-id="MetadataManager" id="daPremis">
 		<parameter id="class" value="edu.duke.archives.migrator.plugins.managers.PremisManager"/>
-		<parameter id="name" value="Duke PREMIS"/>
+		<parameter id="name" value="DA PREMIS 2.2"/>
         <parameter id="description" value="A metadata manager to create PREMIS metadata from Jhove and Droid."/>
 	</extension>
 </plugin>

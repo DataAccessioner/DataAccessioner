@@ -555,6 +555,9 @@ public class DataMigrator {
     }
 
     private void addError(String note) {
+        if (note == null){
+            note = "Unkown (null) Error.";
+        }
         Logger.getLogger(DataMigrator.class.getName()).log(Level.WARNING, note);
         errors.add(note);
         if (metadataManager != null) {

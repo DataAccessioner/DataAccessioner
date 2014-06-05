@@ -6,11 +6,11 @@
     <description>Builds, tests, and runs the project DA_plugins_premis_manager.</description>
     <import file="nbproject/build-impl.xml"/>
     <target name="-post-jar">
-        <zip destfile="dist/edu.duke.archives.migrator.plugins.managers.dukepremis.zip">
+        <zip destfile="dist/dapremis2.zip">
             <fileset dir="build" />
             <fileset file="plugin.xml" />
             <fileset file="license.txt" />
-            <fileset dir="includes" />
+            <!--<fileset dir="includes" />-->
             <fileset dir="." includes="lib/**" />
         </zip>
         
