@@ -26,7 +26,6 @@ public class DataAccessionerAboutBox extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        javax.swing.JLabel imageLabel = new javax.swing.JLabel();
         closeButton = new javax.swing.JButton();
         javax.swing.JLabel appTitleLabel = new javax.swing.JLabel();
         javax.swing.JLabel versionLabel = new javax.swing.JLabel();
@@ -44,6 +43,7 @@ public class DataAccessionerAboutBox extends javax.swing.JDialog {
         setName("aboutBox"); // NOI18N
         setResizable(false);
 
+<<<<<<< HEAD
         imageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         imageLabel.setIcon(resourceMap.getIcon("imageLabel.icon")); // NOI18N
         imageLabel.setVerticalAlignment(javax.swing.SwingConstants.TOP);
@@ -53,10 +53,14 @@ public class DataAccessionerAboutBox extends javax.swing.JDialog {
         imageLabel.setPreferredSize(new java.awt.Dimension(130, 200));
 
         javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(edu.duke.archives.DataAccessionerApp.class).getContext().getActionMap(DataAccessionerAboutBox.class, this);
+=======
+        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(edu.duke.archives.DataAccessioner.class).getContext().getActionMap(DataAccessionerAboutBox.class, this);
+>>>>>>> origin/0.3
         closeButton.setAction(actionMap.get("closeAboutBox")); // NOI18N
         closeButton.setName("closeButton"); // NOI18N
 
         appTitleLabel.setFont(appTitleLabel.getFont().deriveFont(appTitleLabel.getFont().getStyle() | java.awt.Font.BOLD, appTitleLabel.getFont().getSize()+4));
+        appTitleLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         appTitleLabel.setText(resourceMap.getString("Application.title")); // NOI18N
         appTitleLabel.setName("appTitleLabel"); // NOI18N
 
@@ -89,10 +93,15 @@ public class DataAccessionerAboutBox extends javax.swing.JDialog {
         layout.setHorizontalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
-                .add(imageLabel, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
-                    .add(org.jdesktop.layout.GroupLayout.LEADING, layout.createSequentialGroup()
+                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(layout.createSequentialGroup()
+                        .add(136, 136, 136)
+                        .add(closeButton))
+                    .add(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .add(appTitleLabel))
+                    .add(layout.createSequentialGroup()
+                        .addContainerGap()
                         .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                             .add(versionLabel)
                             .add(vendorLabel)
@@ -102,19 +111,18 @@ public class DataAccessionerAboutBox extends javax.swing.JDialog {
                             .add(appVersionLabel)
                             .add(appVendorLabel)
                             .add(appHomepageLabel)))
-                    .add(org.jdesktop.layout.GroupLayout.LEADING, appTitleLabel)
-                    .add(org.jdesktop.layout.GroupLayout.LEADING, appDescLabel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 299, Short.MAX_VALUE)
-                    .add(closeButton))
+                    .add(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .add(appDescLabel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(imageLabel, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
             .add(layout.createSequentialGroup()
                 .addContainerGap()
                 .add(appTitleLabel)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(appDescLabel)
+                .add(appDescLabel, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(versionLabel)
@@ -127,7 +135,7 @@ public class DataAccessionerAboutBox extends javax.swing.JDialog {
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(homepageLabel)
                     .add(appHomepageLabel))
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 65, Short.MAX_VALUE)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .add(closeButton)
                 .addContainerGap())
         );

@@ -24,16 +24,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Vector;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.List;
 import javax.swing.ButtonGroup;
 import javax.swing.Timer;
 import javax.swing.Icon;
@@ -251,7 +248,6 @@ public class DataAccessionerView extends FrameView {
         dataMetadata = new javax.swing.JPanel();
         diskNameLbl = new javax.swing.JLabel();
         diskName = new javax.swing.JTextField();
-        diskNameBtn = new javax.swing.JButton();
         metadataTabs = new javax.swing.JTabbedPane();
         diskLabelSP = new javax.swing.JScrollPane();
         diskLabel = new javax.swing.JTextArea();
@@ -313,10 +309,10 @@ public class DataAccessionerView extends FrameView {
                     .add(accnDirBtn))
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(accessionInfoLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(accnNo, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 236, Short.MAX_VALUE)
-                    .add(collTitle, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 236, Short.MAX_VALUE)
-                    .add(name, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 236, Short.MAX_VALUE)
-                    .add(accnDir, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 236, Short.MAX_VALUE))
+                    .add(accnNo, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 239, Short.MAX_VALUE)
+                    .add(collTitle, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 239, Short.MAX_VALUE)
+                    .add(name, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 239, Short.MAX_VALUE)
+                    .add(accnDir, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 239, Short.MAX_VALUE))
                 .addContainerGap())
         );
         accessionInfoLayout.setVerticalGroup(
@@ -401,21 +397,22 @@ public class DataAccessionerView extends FrameView {
         treePanel.setLayout(treePanelLayout);
         treePanelLayout.setHorizontalGroup(
             treePanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(org.jdesktop.layout.GroupLayout.TRAILING, treeToolBar, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 389, Short.MAX_VALUE)
-            .add(treeSP, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 389, Short.MAX_VALUE)
+            .add(org.jdesktop.layout.GroupLayout.TRAILING, treeToolBar, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 404, Short.MAX_VALUE)
+            .add(treeSP, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 404, Short.MAX_VALUE)
         );
         treePanelLayout.setVerticalGroup(
             treePanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(treePanelLayout.createSequentialGroup()
                 .add(treeToolBar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(treeSP, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 223, Short.MAX_VALUE))
+                .add(treeSP, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 234, Short.MAX_VALUE))
         );
 
         buttonPanel.setName("buttonPanel"); // NOI18N
 
         migrateBtn.setAction(actionMap.get("migrate")); // NOI18N
         migrateBtn.setText(resourceMap.getString("migrateBtn.text")); // NOI18N
+        migrateBtn.setToolTipText(resourceMap.getString("migrateBtn.toolTipText")); // NOI18N
         migrateBtn.setName("migrateBtn"); // NOI18N
         buttonPanel.add(migrateBtn);
 
@@ -426,11 +423,13 @@ public class DataAccessionerView extends FrameView {
 
         resetBtn.setAction(actionMap.get("clearDisk")); // NOI18N
         resetBtn.setText(resourceMap.getString("resetBtn.text")); // NOI18N
+        resetBtn.setToolTipText(resourceMap.getString("resetBtn.toolTipText")); // NOI18N
         resetBtn.setName("resetBtn"); // NOI18N
         buttonPanel.add(resetBtn);
 
         resetAllBtn.setAction(actionMap.get("clearAll")); // NOI18N
         resetAllBtn.setText(resourceMap.getString("resetAllBtn.text")); // NOI18N
+        resetAllBtn.setToolTipText(resourceMap.getString("resetAllBtn.toolTipText")); // NOI18N
         resetAllBtn.setName("resetAllBtn"); // NOI18N
         buttonPanel.add(resetAllBtn);
 
@@ -442,16 +441,13 @@ public class DataAccessionerView extends FrameView {
 
         diskName.setName("diskName"); // NOI18N
 
-        diskNameBtn.setAction(actionMap.get("recommendDiskName")); // NOI18N
-        diskNameBtn.setText(resourceMap.getString("diskNameBtn.text")); // NOI18N
-        diskNameBtn.setName("diskNameBtn"); // NOI18N
-
         metadataTabs.setName("metadataTabs"); // NOI18N
 
         diskLabelSP.setBorder(null);
         diskLabelSP.setName("diskLabelSP"); // NOI18N
 
         diskLabel.setColumns(20);
+        diskLabel.setLineWrap(true);
         diskLabel.setRows(3);
         diskLabel.setTabSize(4);
         diskLabel.setName("diskLabel"); // NOI18N
@@ -463,6 +459,7 @@ public class DataAccessionerView extends FrameView {
         notesSP.setName("notesSP"); // NOI18N
 
         notes.setColumns(20);
+        notes.setLineWrap(true);
         notes.setRows(4);
         notes.setName("notes"); // NOI18N
         notesSP.setViewportView(notes);
@@ -474,20 +471,15 @@ public class DataAccessionerView extends FrameView {
         dataMetadataLayout.setHorizontalGroup(
             dataMetadataLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(diskNameLbl)
-            .add(org.jdesktop.layout.GroupLayout.TRAILING, dataMetadataLayout.createSequentialGroup()
-                .add(diskName, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 224, Short.MAX_VALUE)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(diskNameBtn))
-            .add(metadataTabs, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 373, Short.MAX_VALUE)
+            .add(metadataTabs, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 392, Short.MAX_VALUE)
+            .add(diskName, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 392, Short.MAX_VALUE)
         );
         dataMetadataLayout.setVerticalGroup(
             dataMetadataLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(dataMetadataLayout.createSequentialGroup()
                 .add(diskNameLbl)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(dataMetadataLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                    .add(diskNameBtn)
-                    .add(diskName, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .add(diskName, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(metadataTabs, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 119, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
         );
@@ -499,7 +491,7 @@ public class DataAccessionerView extends FrameView {
             .add(org.jdesktop.layout.GroupLayout.TRAILING, accessionInfo, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .add(dataMetadata, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .add(org.jdesktop.layout.GroupLayout.TRAILING, treePanel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .add(buttonPanel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .add(buttonPanel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 404, Short.MAX_VALUE)
         );
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -562,11 +554,11 @@ public class DataAccessionerView extends FrameView {
         statusPanel.setLayout(statusPanelLayout);
         statusPanelLayout.setHorizontalGroup(
             statusPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(statusPanelSeparator, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 389, Short.MAX_VALUE)
+            .add(statusPanelSeparator, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 404, Short.MAX_VALUE)
             .add(statusPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .add(statusMessageLabel)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 219, Short.MAX_VALUE)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 234, Short.MAX_VALUE)
                 .add(progressBar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(statusAnimationLabel)
@@ -589,14 +581,34 @@ public class DataAccessionerView extends FrameView {
         setStatusBar(statusPanel);
     }// </editor-fold>//GEN-END:initComponents
 
+<<<<<<< HEAD
+=======
     @Action
-    public void clearDisk() {
-        fileTree = null;
-        treeSP.setViewportView(null);
-        diskName.setText("");
-        diskLabel.setText("");
-        notes.setText("");
-        getFrame().repaint();
+    public void clearDisk(boolean confirmation) {
+        int response = JOptionPane.YES_OPTION; //Yes, we want to do it unless confirmed otherwise.
+
+        if (confirmation) { //Check if we really should be getting a confirmation.
+            ResourceMap resourceMap = getResourceMap();
+            response = JOptionPane.showConfirmDialog(getFrame(),
+                    resourceMap.getString("clearDisk.text"),
+                    resourceMap.getString("clearDisk.title.text"),
+                    JOptionPane.YES_NO_OPTION);
+        }
+
+        if (response == JOptionPane.YES_OPTION) {
+            fileTree = null;
+            treeSP.setViewportView(null);
+            diskName.setText("");
+            diskLabel.setText("");
+            notes.setText("");
+            getFrame().repaint();
+        }
+    }
+
+>>>>>>> origin/0.3
+    @Action
+    public void clearDisk() {   
+        clearDisk(true);
     }
 
     private void createTree(File source) {
@@ -681,11 +693,20 @@ public class DataAccessionerView extends FrameView {
 
     @Action
     public void clearAll() {
-        name.setText("");
-        accnNo.setText("");
-        accnDir.setText("");
-        collTitle.setText("");
-        clearDisk();
+        ResourceMap resourceMap = getResourceMap();
+        int response = JOptionPane.showConfirmDialog(getFrame(),
+                resourceMap.getString("clearAll.text"),
+                resourceMap.getString("clearAll.title.text"),
+                JOptionPane.YES_NO_OPTION);
+        if (response == JOptionPane.YES_OPTION) {
+            //Clear top portion
+            name.setText("");
+            accnNo.setText("");
+            accnDir.setText("");
+            collTitle.setText("");
+            //Clear Source
+            clearDisk(false);
+        }
     }
 
     @Action
@@ -792,14 +813,14 @@ public class DataAccessionerView extends FrameView {
             //Add some metadata
             FileWrapper source = getSourceMetadata();
             source.addQualifiedMetadata("note", null, diskName.getText() +
-                    " transfered by " + name.getText() + " on " +
+                    " transferred by " + name.getText() + " on " +
                     new Date(System.currentTimeMillis()).toString());
             if (!notes.getText().equalsIgnoreCase("")) {
                 source.addQualifiedMetadata("note", null,
                         notes.getText());
             }
             if (!diskLabel.getText().equalsIgnoreCase("")) {
-                source.addQualifiedMetadata("description", "label",
+                source.addQualifiedMetadata("description", null,
                         diskLabel.getText());
             }
             source.addQualifiedMetadata("identifier", "accession_no",
@@ -842,11 +863,12 @@ public class DataAccessionerView extends FrameView {
                             JOptionPane.ERROR_MESSAGE);
                 }
             }
+            statusMessageLabel.setText("Migration Canceled.");
         }
         
         @Override
         protected void finished() {
-            clearDisk();
+            clearDisk(false);
             enable(true);
             if (migrator.getErrors().size() > 0) {
                 int answer = JOptionPane.showOptionDialog(getFrame(),
@@ -897,7 +919,10 @@ public class DataAccessionerView extends FrameView {
             setMessage("Successfully migrated data.");
         }
         
-        
+        @Override
+        protected void failed(Throwable cause){
+            setMessage("Failed to migrate the data: "+cause.getLocalizedMessage());
+        }
 
         public void prod() {
             if (migrator != null) {
@@ -1026,7 +1051,7 @@ public class DataAccessionerView extends FrameView {
             accnDir.setText(file.getAbsolutePath());
         }
     }
-
+/** Depreciated
     @Action
     public Task recommendDiskName() {
         return new RecommendDiskNameTask(getApplication());
@@ -1080,12 +1105,18 @@ public class DataAccessionerView extends FrameView {
             diskName.setText(result.toString());
         }
     }
-
+**/
     public class FileSystemModel implements TreeModel, Serializable {
 
+<<<<<<< HEAD
         FileWrapper root;
         private Vector<TreeModelListener> treeModelListeners =
                 new Vector<TreeModelListener>();
+=======
+        Metadata root;
+        private List<TreeModelListener> treeModelListeners =
+                new ArrayList<TreeModelListener>();
+>>>>>>> origin/0.3
 
         public FileSystemModel() {
             this(System.getProperty("user.home"));
@@ -1135,7 +1166,7 @@ public class DataAccessionerView extends FrameView {
         }
 
         public void addTreeModelListener(TreeModelListener l) {
-            treeModelListeners.addElement(l);
+            treeModelListeners.add(l);
 
         }
 
@@ -1143,7 +1174,7 @@ public class DataAccessionerView extends FrameView {
          * Removes a listener previously added with addTreeModelListener().
          */
         public void removeTreeModelListener(TreeModelListener l) {
-            treeModelListeners.removeElement(l);
+            treeModelListeners.remove(l);
         }
     }
 
@@ -1243,7 +1274,6 @@ public class DataAccessionerView extends FrameView {
     protected javax.swing.JTextArea diskLabel;
     private javax.swing.JScrollPane diskLabelSP;
     protected javax.swing.JTextField diskName;
-    private javax.swing.JButton diskNameBtn;
     private javax.swing.JLabel diskNameLbl;
     private javax.swing.JLabel displayLabel;
     private javax.swing.JToggleButton displaySizeBtn;
