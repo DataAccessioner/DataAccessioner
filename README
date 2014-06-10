@@ -1,9 +1,11 @@
-Duke Data Accessioner
+Duke Data Accessioner v. 1.0
+
+**THIS BRANCH IS CURRENTLY UNDER DEVELOPMENT.**
 
 About
 
-The Duke DataAccessioner was built out of the need for a simple GUI interface to allow technical services staff an easy way of migrating data off disks and onto a file server for basic preservation, further appraisal, arrangement, & description. It also provides a way to integrate common metadata tools at the time of migration rather than after the fact. With a simplified interface and being written in Java it is intended to be easily adopted by smaller institutions with little or no IT staff support. Existing tools fulfill different parts of the idea but never completed it. (National Library of Australia system is another option that recently came to light and appears to be very good although it has higher infrastructure requirements.) The very first version of the tool was written in the course of a week in early 2008 and, although usable, it was more of a proof-of-concept. For nearly a year there was no active development except to tune the metadata output and fix some bugs. In January 2009 the Data Accessioner was revisited with a revised architecture. Also, the metadata tool adapters and the custom metadata manager where extracted to be used as plugins.
+The DataAccessioner was built out of the need for a simple GUI interface to allow the Duke University Rare Book, Manuscripts, & Special Collections Library (now the David M. Rubenstein Rare Book & Manuscript Library) Technical Services staff an easy way of migrating data off disks and onto a file server for basic preservation, further appraisal, arrangement, & description. It also provides a way to integrate common metadata tools at the time of migration rather than after the fact. With a simplified interface and being written in Java it is intended to be easily adopted by smaller institutions with little or no IT staff support.
 
-URL: http://library.duke.edu/uarchives/about/tools/data-accessioner.html
+This version (1.0) was developed with the support of the Digital POWRR Project (funded by an Institute of Museum and Library Services National Leadership Grant). The primary change is the exchange of a custom tool-adapter plugin system with FITS integration and primarily relies on XSLT for the former Metadata Manager's role (though future extensibility should be easy, although will need to be hard-coded).
 
-For OS X Users: To enable plugins use the start.sh script. To have the script run via double-click rename start.sh to start.command. (You may also need to enable 'execute' permission for the file.)
+URL: http://www.dataaccessioner.org
