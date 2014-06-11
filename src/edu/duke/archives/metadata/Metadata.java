@@ -3,7 +3,6 @@ package edu.duke.archives.metadata;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
 import org.jdom.Element;
 import org.jdom.Namespace;
@@ -12,17 +11,10 @@ import org.jdom.Namespace;
  *
  * @author Seth Shaw
  */
-public class FileWrapper extends File {
+public class Metadata extends File {
 
-    private FileWrapper parentMetadata;
+    private Metadata parentMetadata;
     private String newName = null;
-<<<<<<< HEAD:src/edu/duke/archives/metadata/FileWrapper.java
-    private TreeMap<String, FileWrapper> childrenMetadata;
-    private Map<String, String> checksums = new TreeMap<String, String>();
-    private ArrayList<QualifiedMetadata> qualifiedMetadata =
-            new ArrayList<QualifiedMetadata>();
-    
-=======
     private TreeMap<String, Metadata> childrenMetadata;
     private String md5;
     private ArrayList<Element> qualifiedMetadata =
@@ -30,29 +22,28 @@ public class FileWrapper extends File {
     private static final Namespace DC_NAMESPACE = Namespace.getNamespace("dc",
             "http://purl.org/dc/elements/1.1/");
     private static final Namespace DEFAULT_NAMESPACE = Namespace.getNamespace("http://dataaccessioner.org/schema/dda-0-3-1");
->>>>>>> origin/0.3:src/edu/duke/archives/metadata/Metadata.java
 
     private boolean excluded = false; //Include by default
 
-    public FileWrapper(String pathname) {
+    public Metadata(String pathname) {
         super(pathname);
     }
 
-    public FileWrapper(String pathname, boolean excluded) {
+    public Metadata(String pathname, boolean excluded) {
         super(pathname);
         setExcluded(excluded);
     }
 
-    public FileWrapper(FileWrapper metadata, String child) {
+    public Metadata(Metadata metadata, String child) {
         super(metadata, child);
         this.parentMetadata = metadata;
         //By default set child to parent's exclude setting
         this.setExcluded(metadata.excluded);
     }
 
-    public FileWrapper(File parent, String child) {
+    public Metadata(File parent, String child) {
         super(parent, child);
-        this.parentMetadata = (FileWrapper) parent;
+        this.parentMetadata = (Metadata) parent;
     }
 
     public void addQualifiedMetadata(Namespace namespace, String element, String qualifier, String value) {
@@ -71,32 +62,18 @@ public class FileWrapper extends File {
         addQualifiedMetadata(DEFAULT_NAMESPACE, element, qualifier, value);
     }
 
-    public Map getChecksums(){
-        return checksums;
-    }
-    
-    public String getChecksum(String algorithm){
-        return (checksums.get(algorithm) == null) ? "" : (String) checksums.get(algorithm);
-    }
-    
     /**
      * @return the MD5
      */
-    @Deprecated
     public String getMD5() {
-        return (checksums.get("MD5") == null)? "" : (String) checksums.get("MD5");
+        return md5;
     }
 
-    public void setChecksum(String algorithm, String value){
-        checksums.put(algorithm, value);
-    }
-    
     /**
      * @param md5 the MD5 to set
      */
-    @Deprecated
     public void setMD5(String md5) {
-        checksums.put("MD5", md5);
+        this.md5 = md5;
     }
 
 
@@ -117,37 +94,37 @@ public class FileWrapper extends File {
         return this.excluded;
     }
 
-    protected void setParentMetadata(FileWrapper parentMetadata) {
+    protected void setParentMetadata(Metadata parentMetadata) {
         this.parentMetadata = parentMetadata;
     }
 
-    public FileWrapper[] listMetadata() {
+    public Metadata[] listMetadata() {
         String[] childrenList = list();
         if (childrenList.length != getChildrenMetadata().values().size()) {
             //Add any children unaccounted for
-            TreeMap<String, FileWrapper> newChildMetadata = new TreeMap<String, FileWrapper>();
+            TreeMap<String, Metadata> newChildMetadata = new TreeMap<String, Metadata>();
             for (int i = 0; i < childrenList.length; i++) {
                 if (childrenMetadata.containsKey(childrenList[i])) {
                     newChildMetadata.put(childrenList[i], childrenMetadata.get(childrenList[i]));
                 } else {
-                    FileWrapper childM = new FileWrapper(this, childrenList[i]);
+                    Metadata childM = new Metadata(this, childrenList[i]);
                     newChildMetadata.put(childM.getName(), childM);
                 }
             }
             //Remove any qualifiedMetadata children not listed
             childrenMetadata = newChildMetadata;
         }
-        return childrenMetadata.values().toArray(new FileWrapper[childrenMetadata.size()]);
+        return childrenMetadata.values().toArray(new Metadata[childrenMetadata.size()]);
     }
 
-    protected TreeMap<String, FileWrapper> getChildrenMetadata() {
+    protected TreeMap<String, Metadata> getChildrenMetadata() {
         if (childrenMetadata == null){
-            childrenMetadata = new TreeMap<String, FileWrapper>();
+            childrenMetadata = new TreeMap<String, Metadata>();
         }
         return childrenMetadata;
     }
 
-    protected void setChildrenMetadata(TreeMap<String, FileWrapper> childrenMetadata) {
+    protected void setChildrenMetadata(TreeMap<String, Metadata> childrenMetadata) {
         this.childrenMetadata = childrenMetadata;
     }
 
@@ -194,10 +171,10 @@ public class FileWrapper extends File {
     public synchronized boolean deleteRecursively() {
         parentMetadata = null;
         qualifiedMetadata = null;
-        checksums.remove("MD5");
+        md5 = null;
         if (this.isDirectory()) {
             for (String path : childrenMetadata.keySet()) {
-                FileWrapper child = childrenMetadata.remove(path);
+                Metadata child = childrenMetadata.remove(path);
                 if (!child.deleteRecursively()) {
                     return false;
                 }

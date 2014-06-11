@@ -5,12 +5,10 @@ package edu.duke.archives;
 
 import edu.duke.archives.interfaces.Adapter;
 import edu.duke.archives.interfaces.MetadataManager;
-import edu.duke.archives.metadata.FileWrapper;
+import edu.duke.archives.metadata.Metadata;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Image;
-import java.awt.Toolkit;
 import java.awt.event.ItemEvent;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,7 +32,6 @@ import java.util.List;
 import javax.swing.ButtonGroup;
 import javax.swing.Timer;
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -62,8 +59,6 @@ public class DataAccessionerView extends FrameView {
     public DataAccessionerView(SingleFrameApplication app) {
         super(app);
 
-        this.getFrame().setIconImage(Toolkit.getDefaultToolkit().getImage(this.getClass().
-                getResource("resources/disk.gif")));
         initComponents();
 
         // status bar initialization - message timeout, idle icon and busy animation, etc
@@ -162,26 +157,29 @@ public class DataAccessionerView extends FrameView {
     @Action
     public void showAboutBox() {
         if (aboutBox == null) {
-            JFrame mainFrame = DataAccessionerApp.getApplication().getMainFrame();
+            JFrame mainFrame = DataAccessioner.getApplication().getMainFrame();
             aboutBox = new DataAccessionerAboutBox(mainFrame);
             aboutBox.setLocationRelativeTo(mainFrame);
         }
-        DataAccessionerApp.getApplication().show(aboutBox);
+        DataAccessioner.getApplication().show(aboutBox);
     }
 
-    void setMigrator(DataAccessioner migrator) {
+    void setMigrator(DataMigrator migrator) {
         this.migrator = migrator;
         
-        //FileWrapper Managers
+        //Metadata Managers
         mmMenu.removeAll();
         MetadataManagerMenuActionListener mmmal =
                 new MetadataManagerMenuActionListener();
         ButtonGroup group = new ButtonGroup();
+        boolean selected = true;
         for (MetadataManager mm : migrator.getAvailableManagers()) {
             rbMenuItem = new JRadioButtonMenuItem(mm.getName());
             try {
-                if (mm.equals(migrator.getMetadataManager())) {
-                    rbMenuItem.setSelected(true);
+                if (selected) {
+                    migrator.setMetadataManager(mm);
+                    rbMenuItem.setSelected(selected);
+                    selected = false;
                 }
             } catch (Exception ex) {
                 Logger.getLogger(DataAccessionerView.class.getName()).
@@ -206,8 +204,8 @@ public class DataAccessionerView extends FrameView {
         }
     }
 
-    private FileWrapper getSourceMetadata() {
-        return (FileWrapper) fileTree.getModel().getRoot();
+    private Metadata getSourceMetadata() {
+        return (Metadata) fileTree.getModel().getRoot();
     }
 
     /** This method is called from within the constructor to
@@ -271,7 +269,7 @@ public class DataAccessionerView extends FrameView {
 
         accessionInfo.setName("accessionInfo"); // NOI18N
 
-        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(edu.duke.archives.DataAccessionerApp.class).getContext().getResourceMap(DataAccessionerView.class);
+        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(edu.duke.archives.DataAccessioner.class).getContext().getResourceMap(DataAccessionerView.class);
         nameLbl.setText(resourceMap.getString("nameLbl.text")); // NOI18N
         nameLbl.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
         nameLbl.setName("nameLbl"); // NOI18N
@@ -283,7 +281,7 @@ public class DataAccessionerView extends FrameView {
         collTitleLbl.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
         collTitleLbl.setName("collTitleLbl"); // NOI18N
 
-        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(edu.duke.archives.DataAccessionerApp.class).getContext().getActionMap(DataAccessionerView.class, this);
+        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(edu.duke.archives.DataAccessioner.class).getContext().getActionMap(DataAccessionerView.class, this);
         accnDirBtn.setAction(actionMap.get("setAccessionDir")); // NOI18N
         accnDirBtn.setText(resourceMap.getString("accnDirBtn.text")); // NOI18N
         accnDirBtn.setName("accnDirBtn"); // NOI18N
@@ -303,16 +301,16 @@ public class DataAccessionerView extends FrameView {
             .add(accessionInfoLayout.createSequentialGroup()
                 .addContainerGap()
                 .add(accessionInfoLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
-                    .add(collTitleLbl, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 71, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(accnNoLbl)
                     .add(nameLbl)
-                    .add(accnDirBtn))
+                    .add(accnDirBtn)
+                    .add(collTitleLbl))
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(accessionInfoLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(accnNo, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 239, Short.MAX_VALUE)
-                    .add(collTitle, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 239, Short.MAX_VALUE)
-                    .add(name, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 239, Short.MAX_VALUE)
-                    .add(accnDir, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 239, Short.MAX_VALUE))
+                    .add(accnNo, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 214, Short.MAX_VALUE)
+                    .add(collTitle, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 214, Short.MAX_VALUE)
+                    .add(name, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 214, Short.MAX_VALUE)
+                    .add(accnDir, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 214, Short.MAX_VALUE))
                 .addContainerGap())
         );
         accessionInfoLayout.setVerticalGroup(
@@ -343,6 +341,7 @@ public class DataAccessionerView extends FrameView {
 
         loadSrcBtn.setAction(actionMap.get("loadSrcDir")); // NOI18N
         loadSrcBtn.setText(resourceMap.getString("loadSrcBtn.text")); // NOI18N
+        loadSrcBtn.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         loadSrcBtn.setFocusable(false);
         loadSrcBtn.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         loadSrcBtn.setName("loadSrcBtn"); // NOI18N
@@ -374,6 +373,7 @@ public class DataAccessionerView extends FrameView {
         treeToolBar.add(displayLabel);
 
         displaySizeBtn.setText(resourceMap.getString("displaySizeBtn.text")); // NOI18N
+        displaySizeBtn.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         displaySizeBtn.setFocusable(false);
         displaySizeBtn.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         displaySizeBtn.setName("displaySizeBtn"); // NOI18N
@@ -381,6 +381,7 @@ public class DataAccessionerView extends FrameView {
         treeToolBar.add(displaySizeBtn);
 
         lastModBtn.setText(resourceMap.getString("lastModBtn.text")); // NOI18N
+        lastModBtn.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         lastModBtn.setFocusable(false);
         lastModBtn.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         lastModBtn.setName("lastModBtn"); // NOI18N
@@ -405,7 +406,7 @@ public class DataAccessionerView extends FrameView {
             .add(treePanelLayout.createSequentialGroup()
                 .add(treeToolBar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(treeSP, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 234, Short.MAX_VALUE))
+                .add(treeSP, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 205, Short.MAX_VALUE))
         );
 
         buttonPanel.setName("buttonPanel"); // NOI18N
@@ -491,7 +492,7 @@ public class DataAccessionerView extends FrameView {
             .add(org.jdesktop.layout.GroupLayout.TRAILING, accessionInfo, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .add(dataMetadata, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .add(org.jdesktop.layout.GroupLayout.TRAILING, treePanel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .add(buttonPanel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 404, Short.MAX_VALUE)
+            .add(buttonPanel, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 404, Short.MAX_VALUE)
         );
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -558,7 +559,7 @@ public class DataAccessionerView extends FrameView {
             .add(statusPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .add(statusMessageLabel)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 234, Short.MAX_VALUE)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 229, Short.MAX_VALUE)
                 .add(progressBar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(statusAnimationLabel)
@@ -581,9 +582,6 @@ public class DataAccessionerView extends FrameView {
         setStatusBar(statusPanel);
     }// </editor-fold>//GEN-END:initComponents
 
-<<<<<<< HEAD
-=======
-    @Action
     public void clearDisk(boolean confirmation) {
         int response = JOptionPane.YES_OPTION; //Yes, we want to do it unless confirmed otherwise.
 
@@ -605,7 +603,6 @@ public class DataAccessionerView extends FrameView {
         }
     }
 
->>>>>>> origin/0.3
     @Action
     public void clearDisk() {   
         clearDisk(true);
@@ -617,17 +614,17 @@ public class DataAccessionerView extends FrameView {
             @Override
             public String convertValueToText(Object value, boolean selected,
                     boolean expanded, boolean leaf, int row, boolean hasFocus) {
-                String returned = ((FileWrapper) value).getName();
+                String returned = ((Metadata) value).getName();
                 if (leaf) {
                     if (displaySize) {
                         returned +=
                                 " (" +
-                                prettySize(((FileWrapper) value).length()) + ")";
+                                prettySize(((Metadata) value).length()) + ")";
                     }
                     if (displayLastModified) {
                         returned +=
                                 " [" +
-                                dateFormat.format(new Date(((FileWrapper) value).lastModified())) + "]";
+                                dateFormat.format(new Date(((Metadata) value).lastModified())) + "]";
                     }
                 }
                 return returned;
@@ -654,7 +651,7 @@ public class DataAccessionerView extends FrameView {
                         expanded, leaf, row,
                         hasFocus);
 
-                FileWrapper nodeInfo = (FileWrapper) value;
+                Metadata nodeInfo = (Metadata) value;
 
                 //Set ToolTip
                 if (nodeInfo.isDirectory()) {
@@ -811,7 +808,7 @@ public class DataAccessionerView extends FrameView {
         protected Object doInBackground() {
             setMessage("Preparing migration ...");
             //Add some metadata
-            FileWrapper source = getSourceMetadata();
+            Metadata source = getSourceMetadata();
             source.addQualifiedMetadata("note", null, diskName.getText() +
                     " transferred by " + name.getText() + " on " +
                     new Date(System.currentTimeMillis()).toString());
@@ -828,9 +825,9 @@ public class DataAccessionerView extends FrameView {
             source.addQualifiedMetadata("title", "collection",
                     collTitle.getText());
             source.setNewName(diskName.getText());
-            migrator.setSource(source);
+            migrator.setSourceDirectory(source);
             //Set destination dir
-            migrator.setDestination(new File(accnDir.getText(),
+            migrator.setDestinationDir(new File(accnDir.getText(),
                     accnNo.getText()));
 
             //Run migrator
@@ -988,8 +985,8 @@ public class DataAccessionerView extends FrameView {
         TreePath[] currentSelections = fileTree.getSelectionPaths();
         for (TreePath currentSelection : currentSelections) {
             if (currentSelection != null) {
-                FileWrapper currentNode =
-                        (FileWrapper) currentSelection.getLastPathComponent();
+                Metadata currentNode =
+                        (Metadata) currentSelection.getLastPathComponent();
                 currentNode.setExcluded(exclude);
                 if (exclude) {
                     fileTree.collapsePath(currentSelection);
@@ -1108,44 +1105,45 @@ public class DataAccessionerView extends FrameView {
 **/
     public class FileSystemModel implements TreeModel, Serializable {
 
-<<<<<<< HEAD
-        FileWrapper root;
-        private Vector<TreeModelListener> treeModelListeners =
-                new Vector<TreeModelListener>();
-=======
         Metadata root;
         private List<TreeModelListener> treeModelListeners =
                 new ArrayList<TreeModelListener>();
->>>>>>> origin/0.3
 
         public FileSystemModel() {
             this(System.getProperty("user.home"));
         }
 
         public FileSystemModel(String startPath) {
-            root = new FileWrapper(startPath);
+            root = new Metadata(startPath);
         }
 
-        public FileWrapper getRoot() {
+        public Metadata getRoot() {
             return root;
         }
 
-        public FileWrapper getChild(Object parent, int index) {
-            FileWrapper directory = (FileWrapper) parent;
+        public Metadata getChild(Object parent, int index) {
+            Metadata directory = (Metadata) parent;
             return directory.listMetadata()[index];
         }
 
         public int getChildCount(Object parent) {
-            FileWrapper fileSysEntity = (FileWrapper) parent;
-            if (fileSysEntity.isDirectory()) {
-                return fileSysEntity.listMetadata().length;
-            } else {
+            try {
+                Metadata fileSysEntity = (Metadata) parent;
+                if (fileSysEntity.isDirectory()) {
+                    return fileSysEntity.listMetadata().length;
+                } else {
+                    return 0;
+                }
+            } catch (Exception e) {
+                //If anything goes wrong, assume zero but still report.
+                System.err.println("Could not list children of " + parent);
+                e.printStackTrace();
                 return 0;
             }
         }
 
         public boolean isLeaf(Object node) {
-            return ((FileWrapper) node).isFile();
+            return ((Metadata) node).isFile();
         }
 
         public void valueForPathChanged(TreePath path, Object newValue) {
@@ -1153,9 +1151,9 @@ public class DataAccessionerView extends FrameView {
         }
 
         public int getIndexOfChild(Object parent, Object child) {
-            FileWrapper directory = (FileWrapper) parent;
-            FileWrapper fileSysEntity = (FileWrapper) child;
-            FileWrapper[] children = directory.listMetadata();
+            Metadata directory = (Metadata) parent;
+            Metadata fileSysEntity = (Metadata) child;
+            Metadata[] children = directory.listMetadata();
 
             for (int i = 0; i < children.length; ++i) {
                 if (fileSysEntity.getName().equals(children[i].getName())) {
@@ -1315,6 +1313,6 @@ public class DataAccessionerView extends FrameView {
     private boolean displayLastModified = false;
     private JDialog aboutBox;
     private Icon excludeIcon,  fileIcon,  folderIcon,  excludeHiddenIcon,  fileHiddenIcon,  folderHiddenIcon;
-    private DataAccessioner migrator = null;
+    private DataMigrator migrator = null;
     private MigrateTask currentMigration = null;
 }

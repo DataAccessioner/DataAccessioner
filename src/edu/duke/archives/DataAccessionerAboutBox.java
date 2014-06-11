@@ -37,25 +37,13 @@ public class DataAccessionerAboutBox extends javax.swing.JDialog {
         javax.swing.JLabel appDescLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(edu.duke.archives.DataAccessionerApp.class).getContext().getResourceMap(DataAccessionerAboutBox.class);
+        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(edu.duke.archives.DataAccessioner.class).getContext().getResourceMap(DataAccessionerAboutBox.class);
         setTitle(resourceMap.getString("title")); // NOI18N
         setModal(true);
         setName("aboutBox"); // NOI18N
         setResizable(false);
 
-<<<<<<< HEAD
-        imageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        imageLabel.setIcon(resourceMap.getIcon("imageLabel.icon")); // NOI18N
-        imageLabel.setVerticalAlignment(javax.swing.SwingConstants.TOP);
-        imageLabel.setMaximumSize(new java.awt.Dimension(130, 223));
-        imageLabel.setMinimumSize(new java.awt.Dimension(130, 200));
-        imageLabel.setName("imageLabel"); // NOI18N
-        imageLabel.setPreferredSize(new java.awt.Dimension(130, 200));
-
-        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(edu.duke.archives.DataAccessionerApp.class).getContext().getActionMap(DataAccessionerAboutBox.class, this);
-=======
         javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(edu.duke.archives.DataAccessioner.class).getContext().getActionMap(DataAccessionerAboutBox.class, this);
->>>>>>> origin/0.3
         closeButton.setAction(actionMap.get("closeAboutBox")); // NOI18N
         closeButton.setName("closeButton"); // NOI18N
 
