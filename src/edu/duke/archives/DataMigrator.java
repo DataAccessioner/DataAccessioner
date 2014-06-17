@@ -498,6 +498,7 @@ public class DataMigrator {
             }
 
             //File-level plugins run here.
+            setCurrentMessage("Running Adapters for: " + src.getName());
             for (Adapter adapter : selectedAdapters) {
                 metadataManager.addXML(adapter.runFile(dest));
             }

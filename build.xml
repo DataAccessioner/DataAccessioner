@@ -8,20 +8,14 @@
     <target name="-post-jar">
         <jar update="true" destfile="${dist.jar}">
             <zipfileset src="lib/appframework-1.0.3.jar"/>
-            <zipfileset src="lib/commons-cli-1.2.jar" />
             <zipfileset src="lib/commons-logging.jar" />
-            <zipfileset src="lib/commons-configuration-1.6.jar" />
-            <zipfileset src="lib/commons-lang-2.4.jar" />
-            <zipfileset src="lib/commons-collections-3.2.1.jar" />
             <zipfileset src="lib/jaxen-core.jar" />
             <zipfileset src="lib/jaxen-jdom.jar" />
             <zipfileset src="lib/jdom.jar" />
-            <zipfileset src="lib/jxp.jar" />
             <zipfileset src="lib/jpf.jar" />
             <zipfileset src="lib/saxpath.jar" />
             <zipfileset src="lib/swing-layout-1.0.3.jar" />
             <zipfileset src="lib/swing-worker-1.1.jar" />
-            <fileset file="splash.gif" />
         </jar>
         <copy todir="${dist.dir}" >
             <fileset file="start.bat" />
