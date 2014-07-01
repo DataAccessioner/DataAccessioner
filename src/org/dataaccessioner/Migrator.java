@@ -18,6 +18,9 @@
  */
 package org.dataaccessioner;
 
+import edu.harvard.hul.ois.fits.Fits;
+import edu.harvard.hul.ois.fits.FitsOutput;
+import edu.harvard.hul.ois.fits.exceptions.FitsException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -30,8 +33,10 @@ import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -45,14 +50,31 @@ public class Migrator {
     public final static int STATUS_RUNNING = 20;
     public final static int STATUS_SUCCESS = 30;
 
+    public final static int OPTION_ID_SOURCE = 1001;
+    public final static int OPTION_ID_DESTINATION = 1002;
+    public final static int OPTION_ID_NONE = 1000;
+    
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
     private String statusMessage = "";
-    private final List warnings = new ArrayList();
+    private int status = STATUS_INITIALIZING;
+    private List<String> warnings = new ArrayList<String>();
 
     private boolean optionFailOnPartial = false;
+    private boolean optionOverwriteExisting = false;
     private String digestAlgorithm = "MD5"; //Default MD5
+    private int optionIDWhich = OPTION_ID_DESTINATION;    
 
+    private Fits fits = null;
+    
+    public Migrator() throws FitsException {
+        fits = new Fits();
+    }
+
+    public Migrator(Fits fits){
+        this.fits = fits;
+    }
+    
     public String getDigestAlgorithm() {
         return digestAlgorithm;
     }
@@ -67,16 +89,50 @@ public class Migrator {
         return true;
     }
 
-    public void setOptionFailOnPartial(boolean optionFailOnPartial) {
+    public boolean willOverwriteExisting() {
+        return optionOverwriteExisting;
+    }
+
+    public void setOptionOverwriteExisting(boolean optionOverwriteExisting) {
+        this.optionOverwriteExisting = optionOverwriteExisting;
+    }
+    
+    public boolean willFailOnPartial() {
+        return this.optionFailOnPartial;
+    }
+    
+    public void setFailOnPartial(boolean optionFailOnPartial) {
         this.optionFailOnPartial = optionFailOnPartial;
     }
 
-    public List getWarnings() {
+    public int getOptionIDWhich() {
+        return optionIDWhich;
+    }
+
+    public boolean setIDWhich(int optionIDWhich) {
+        if (Arrays.asList(
+                OPTION_ID_DESTINATION, 
+                OPTION_ID_SOURCE, 
+                OPTION_ID_NONE).contains(optionIDWhich)) {
+            this.optionIDWhich = optionIDWhich;
+            return true;
+        }
+        return false;
+    }
+    
+    
+
+    public List<String> getWarnings() {
         return warnings;
     }
 
+    public int getStatus() {
+        return status;
+    }
+
+    
     public int run(File source, File destination) {
-        int status = STATUS_INITIALIZING;
+        status = STATUS_INITIALIZING;
         try {
             status = STATUS_RUNNING;
             status = copyDirectory(source, destination);
@@ -128,9 +184,27 @@ public class Migrator {
             } else if (child.isFile()) {
                 switch (copyFile(child, new File(destination, child.getName()))) {
                     case STATUS_FAILURE:
-                        return STATUS_FAILURE;
+                        if(optionFailOnPartial){
+                            return STATUS_FAILURE;
+                        } else {
+                            warnings.add("Failed to securely copy "+child.getPath());
+                        }
                     case STATUS_CANCELED:
                         return STATUS_CANCELED;
+                }
+                File toProcess = null;
+                switch (optionIDWhich){
+                    case OPTION_ID_DESTINATION:
+                        toProcess = new File(destination, child.getName());
+                        break;
+                    case OPTION_ID_SOURCE:
+                        toProcess = child;
+                        break;
+                    case OPTION_ID_NONE:
+                        toProcess = null;
+                }
+                if(toProcess != null){
+                    runFits(toProcess);
                 }
             }
         }
@@ -138,7 +212,7 @@ public class Migrator {
             destination.setLastModified(source.lastModified());
         } catch (Exception e) {
             warnings.add("Unable to set Last Modified date for "
-                    + destination.getAbsolutePath() + "to "
+                    + destination.getAbsolutePath() + " to "
                     + DATE_FORMAT.format(new Date(source.lastModified())));
         }
         return STATUS_RUNNING;
@@ -147,12 +221,19 @@ public class Migrator {
     private int copyFile(File source, File destination) {
         statusMessage = "Migrating " + source.getPath();
         if (!source.canRead()) {
-            warnings.add("Unable to copy " + source.getAbsolutePath() + "(unreadable file)");
+            warnings.add("Unable to copy " + source.getAbsolutePath() + " (unreadable file).");
+            if (optionFailOnPartial) {
+                return STATUS_FAILURE;
+            }
+        } else if (!optionOverwriteExisting && destination.exists()) {
+            warnings.add("Unable to copy " + source.getAbsolutePath() + " (destination file already exists).");
             if (optionFailOnPartial) {
                 return STATUS_FAILURE;
             }
         } else {
             try {
+                //TODO: Could fast-md5 be used instead?
+                
                 //Generate & record Hash
                 /*
                  * MD5 code from R.J. Lorimer, "Getting MD5 Sums in Java",
@@ -172,7 +253,7 @@ public class Migrator {
                 try {
                     while ((read = is.read(buffer)) > -1) {
                         digest.update(buffer, 0, read);
-                        os.write(buffer);
+                        os.write(buffer, 0, read);
                     }
                     byte[] checksumBytes = digest.digest();
                     inDigest = "";
@@ -198,7 +279,7 @@ public class Migrator {
                     }
 
                     if (inDigest.compareTo(outDigest) != 0) {
-                        String message = "Transfer failed, the copied file checksum (" + digestAlgorithm
+                        String message = "Transfer of "+source.getPath()+" to "+destination.getPath()+" failed, the copied file checksum (" + digestAlgorithm
                                 + ") did not match: " + inDigest + " != " + outDigest;
                         warnings.add(message);
                         if (optionFailOnPartial) {
@@ -257,5 +338,27 @@ public class Migrator {
             throw new IllegalArgumentException("Directory cannot be read: "
                     + aDirectory);
         }
+    }
+
+    private int runFits(File toProcess) {
+        try {
+            statusMessage = "Running FITS on "+toProcess.getPath();
+
+            FitsOutput fout = fits.examine(toProcess);
+            System.out.println(statusMessage);
+            //Oddly, using fout.output(System.out) doesn't work on subsequent items. Only the first prints although the other methods do work.
+            System.out.println(fout.getFitsXml().toString());
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+            String message = "Failed to run FITS on "+toProcess.getPath();
+            if(optionFailOnPartial){
+                statusMessage = message;
+                return STATUS_FAILURE;
+            } else {
+                warnings.add(message);
+            }
+        }
+        
+        return STATUS_RUNNING;
     }
 }
