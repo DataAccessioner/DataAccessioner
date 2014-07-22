@@ -21,6 +21,7 @@ package org.dataaccessioner;
 import com.twmacinta.util.MD5;
 import edu.harvard.hul.ois.fits.Fits;
 import edu.harvard.hul.ois.fits.FitsOutput;
+import edu.harvard.hul.ois.fits.exceptions.FitsException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -28,8 +29,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -62,31 +61,23 @@ public class Migrator {
 
     private boolean optionFailOnPartial = false;
     private boolean optionOverwriteExisting = false;
-    private String digestAlgorithm = "MD5"; //Default MD5
     private int optionIDWhich = OPTION_ID_DESTINATION;
 
     private Fits fits = null;
     private MetadataManager metadataManager = null;
 
-    public Migrator(Fits fits, MetadataManager metadataManager) {
+    public Migrator() {
+        
+    }
+
+    public void setFits(Fits fits) {
         this.fits = fits;
+    }
+
+    public void setMetadataManager(MetadataManager metadataManager) {
         this.metadataManager = metadataManager;
     }
-
-    public String getDigestAlgorithm() {
-        return digestAlgorithm;
-    }
-
-    public boolean setDigestAlgorithm(String digestAlgorithm) {
-        try {
-            MessageDigest.getInstance(digestAlgorithm);
-        } catch (NoSuchAlgorithmException ex) {
-            return false;
-        }
-        this.digestAlgorithm = digestAlgorithm;
-        return true;
-    }
-
+    
     public boolean willOverwriteExisting() {
         return optionOverwriteExisting;
     }
@@ -128,6 +119,11 @@ public class Migrator {
 
     public int run(File source, File destination) {
         status = STATUS_INITIALIZING;
+        if (metadataManager == null){
+            //Possibly create a sys.out migrator to use by default?
+            warnings.add("Failed to start migrator. No metadata manager set!");
+            return STATUS_FAILURE;
+        }
         try {
             status = STATUS_RUNNING;
             status = processDirectory(source, destination);
@@ -256,13 +252,13 @@ public class Migrator {
 
                 } catch (IOException e) {
                     throw new RuntimeException("Unable to process source file "
-                            + source.getName() + " for " + digestAlgorithm, e);
+                            + source.getName(), e);
                 } finally {
                     try {
                         is.close();
                         os.close();
                     } catch (IOException e) {
-                        throw new RuntimeException("Unable to close input stream for " + digestAlgorithm + " calculation",
+                        throw new RuntimeException("Unable to close input stream.",
                                 e);
                     }
                 }
@@ -292,14 +288,14 @@ public class Migrator {
             case OPTION_ID_NONE:
                 toProcess = null;
         }
-        if (toProcess != null) {
+        if (toProcess != null && fits != null) {
             try {
                 statusMessage = "Running FITS on " + toProcess.getPath();
 
                 FitsOutput fout = fits.examine(toProcess);
                 System.out.println(statusMessage);
                 metadataManager.addDocumentXSLT(fout.getFitsXml());
-            } catch (Exception ex) {
+            } catch (FitsException ex) {
                 Exceptions.printStackTrace(ex);
                 String message = "Failed to run FITS on " + toProcess.getPath();
                 if (optionFailOnPartial) {

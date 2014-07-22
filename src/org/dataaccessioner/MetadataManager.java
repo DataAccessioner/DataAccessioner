@@ -52,6 +52,8 @@ public class MetadataManager {
     private static final Namespace DEFAULT_NAMESPACE = Namespace.getNamespace("http://dataaccessioner.org/schema/dda-0-3-1");
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
     
+    private String DEFAULT_XSLT = "xml/metadataManager.xsl";
+    
     public String getName() {
         return "Full Metadata";
     }
@@ -98,7 +100,7 @@ public class MetadataManager {
                 output.close();
                 osw.close();
                 stream.close();
-            } catch (IOException ex) {
+            } catch (Exception ex) {
                 System.err.println("Failed to close output streams when writting out " 
                         + xmlFile.getName() + ": " + ex.getMessage());
             }
@@ -155,11 +157,12 @@ public class MetadataManager {
     public void addElement(Element element){
         currentElement.addContent(element);
     }
+
     public boolean addDocumentXSLT(Document document){
         try {
             XSLTransformer transformer = new XSLTransformer("xml/metadataManager.xsl");
             Document premis = transformer.transform(document);
-            currentElement.addContent(premis.detachRootElement());
+            addElement(premis.detachRootElement());
         } catch (XSLTransformException ex) {
             System.err.println("Failed to transform document xml using xml/metadataManager.xsl");
             addElement(document.detachRootElement());

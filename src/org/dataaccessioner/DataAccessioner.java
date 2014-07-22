@@ -1,14 +1,29 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2014 Seth Shaw.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ * MA 02110-1301  USA
  */
 
 package org.dataaccessioner;
 
+import com.sun.jmx.remote.internal.ArrayQueue;
 import edu.harvard.hul.ois.fits.Fits;
 import edu.harvard.hul.ois.fits.exceptions.FitsException;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -31,17 +46,17 @@ public class DataAccessioner {
     private static final String VERSION = "1.0";
     private static Logger logger;
     
-    private String collectionName = "";
-    private String accessionNumber = "";
     private Fits fits;
     private MetadataManager metadataManager;
-    private Migrator migrator;
+    private Migrator migrator = new Migrator();
     
     public DataAccessioner(){
         System.setProperty( "log4j.configuration", Fits.FITS_TOOLS + "log4j.properties" );
         logger = Logger.getLogger( this.getClass() );
         
         //May eventually setup some other configuration stuff here.
+        //FITS is not initialized here because it takes some time to start
+        //and the user may opt not to use it.
     }
     
     /**
@@ -50,13 +65,16 @@ public class DataAccessioner {
      */
     public static void main(String[] args) throws ParseException {
         DataAccessioner da = new DataAccessioner();
+        //Default settings
+        String collectionName = "";
+        String accessionNumber = "";
         
         Options options = new Options();
         options.addOption("c", true, "Collection Name");
         options.addOption("a", true, "Accession Number");
-        options.addOption( "h", false, "print this message" );
-        options.addOption( "v", false, "print version information" );
-        options.addOption("p", false, "Do not start GUI; requires a source and destination");
+        options.addOption("h", false, "print this message" );
+        options.addOption("v", false, "print version information" );
+        options.addOption("u", false, "Do not start GUI; requires a source and destination");
         
         OptionGroup fitsOptions = new OptionGroup();
         fitsOptions.addOption(new Option("s", false, "Run FITS on source"));
@@ -75,57 +93,88 @@ public class DataAccessioner {
             System.exit(0);
         }
         if(cmd.hasOption("c")){
-            da.collectionName = cmd.getOptionValue("c");
+            collectionName = cmd.getOptionValue("c");
         }
         if (cmd.hasOption("a")){
-            da.accessionNumber = cmd.getOptionValue("a");
+            accessionNumber = cmd.getOptionValue("a");
         }
 
         try {
             if (cmd.hasOption("x")) {
                 da.fits = null;
             } else {
-                            logger.info("Starting FITS");
+                logger.info("Starting FITS");
                 da.fits = new Fits();
             }
-            
-            //If 
-            
         } catch (FitsException ex) {
             System.err.println("FITS failed to initialize.");
             Exceptions.printStackTrace(ex);
-        } catch (Exception ex) {
-            System.err.println("MetadataManager failed to initalize.");
-            Exceptions.printStackTrace(ex);
         }
+        //Get the destination & source
+        File destination = null;
+        List<File> sources = new ArrayList<File>();
+        if (!cmd.getArgList().isEmpty()) {
+            destination = new File((String) cmd.getArgList().remove(0));
+
+            //validate sources or reject them
+            for (Object sourceObj : cmd.getArgList()) {
+                File source = new File(sourceObj.toString());
+                if (source.canRead()) {
+                    sources.add(source);
+                }
+            }
+        }
+
+        if (cmd.hasOption("u")) {//Unattended
+            if (collectionName.isEmpty() || accessionNumber.isEmpty()) {
+                System.err.println("Both a collection name and an accession number must be provided if not using the GUI.");
+                printHelp(options);
+            } else if (destination == null || ! (destination.isDirectory() && destination.canWrite())) {
+                String destinationStr = "<blank>";
+                if (destination != null){
+                    destinationStr = destination.toString();
+                }
+                System.err.println("Cannot run automatically. The destination (" + destinationStr + ") is either not a valid or writable directory.");
+                printHelp(options);
+            } else if (sources.isEmpty()) {
+                System.err.println("Cannot run automatically. At least one valid source is required.");
+                printHelp(options);
+            } else {
+                da.runUnattended(destination, sources, accessionNumber, collectionName);
+            }
+
+        } else { //Start GUI
+
+        }
+
     }
 
-    private void autoPilot(File destination, List<File> sources) {
+    private void runUnattended(File destination, List<File> sources, String accessionNumber, String collectionName) {
         
-        //BLAST, trying to figure out where and when to set options via initializing everything.....
         try {
-            File metadata = new File(new File(destination, accessionNumber), accessionNumber + ".xml");
-            metadata.mkdirs();
-            metadataManager = new MetadataManager(metadata, collectionName, accessionNumber);
-            logger.info("Initializing Migrator");
-            Migrator migrator = new Migrator(fits, metadataManager);
-            migrator.setOptionOverwriteExisting(false);
-            migrator.setFailOnPartial(false);
-            if (!migrator.setDigestAlgorithm("SHA-1")) {
-                System.err.println("Failed to set SHA-1 checksum algorithm.");
-            }
-            System.out.println("Starting Migrator");
-            switch (migrator.run(new File("C:\\Users\\sshaw6\\Dropbox\\Family\\"), new File("C:\\Temp\\"))) {
-                case Migrator.STATUS_FAILURE:
-                    System.err.println("Migration failed! "
-                            + migrator.getStatusMessage());
-                    break;
-                case Migrator.STATUS_SUCCESS:
-                    System.out.println("Migration completed successfully!");
-            }
+            File accnDir = new File(destination, accessionNumber);
+            accnDir.mkdirs();
+            File metadata = new File(accnDir, accessionNumber + ".xml");
 
-            for (String warning : migrator.getWarnings()) {
-                logger.warn(warning);
+            metadataManager = new MetadataManager(metadata, collectionName, accessionNumber);
+            migrator.setMetadataManager(metadataManager);
+            migrator.setFits(fits);
+            System.out.println("Starting Migrator");
+            for (File source : sources) {
+                File sourceDestination = new File(accnDir,source.getName());
+                sourceDestination.mkdirs();
+                switch (migrator.run(source, sourceDestination)) {
+                    case Migrator.STATUS_FAILURE:
+                        System.err.println("Migration failed! "
+                                + migrator.getStatusMessage());
+                        break;
+                    case Migrator.STATUS_SUCCESS:
+                        System.out.println("Migration completed successfully!");
+                }
+
+                for (String warning : migrator.getWarnings()) {
+                    logger.warn(warning);
+                }
             }
         } catch (Exception ex) {
             logger.error(ex.getMessage());
