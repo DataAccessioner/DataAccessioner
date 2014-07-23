@@ -34,6 +34,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import org.openide.util.Exceptions;
 
@@ -65,6 +66,7 @@ public class Migrator {
 
     private Fits fits = null;
     private MetadataManager metadataManager = null;
+    private HashSet excludedItems = new HashSet(); //Hash key is the file's absolute path
 
     public Migrator() {
         
@@ -158,6 +160,9 @@ public class Migrator {
         validateDirectory(destination);
         metadataManager.startDirectory(source);
         for (File child : source.listFiles()) {
+            if(isExcluded(child)){ // Ensure it shouldn't be skipped. Considering a redundant check at the beginning of both "processing" methods.
+                continue;
+            }
             if (child.isDirectory()) {
                 File childDestination = new File(destination, child.getName());
                 if (!childDestination.mkdirs()) {
@@ -327,5 +332,28 @@ public class Migrator {
             throw new IllegalArgumentException("Directory cannot be read: "
                     + aDirectory);
         }
+    }
+    
+    /**
+     * Checks if a file in question has been marked to be skipped
+     * during migration.
+     * 
+     * @param file
+     * @return if the file should be skipped.
+     */
+    public boolean isExcluded(File file){
+        if(excludedItems.contains(file.getAbsolutePath())){
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * Mark a file to be excluded during migration.
+     * 
+     * @param file the file to be skipped.
+     */
+    public void addExclusion(File file){
+        excludedItems.add(file.getAbsolutePath());
     }
 }

@@ -26,7 +26,13 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import org.apache.tika.metadata.DublinCore;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.Property;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -52,13 +58,50 @@ public class MetadataManager {
     private static final Namespace DEFAULT_NAMESPACE = Namespace.getNamespace("http://dataaccessioner.org/schema/dda-0-3-1");
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
     
+    private static final Namespace DC_NAMESPACE = Namespace.getNamespace("dc","http://purl.org/dc/elements/1.1/");
+    private static final Namespace DC_XML = Namespace.getNamespace("dcx","http://purl.org/dc/xml/");
+    private static final List<Property> DC_ELEMENTS = Arrays.asList(
+        DublinCore.CONTRIBUTOR,
+        DublinCore.COVERAGE,
+        DublinCore.CREATED,
+        DublinCore.CREATOR,
+        DublinCore.DATE,
+        DublinCore.DESCRIPTION,
+        DublinCore.FORMAT,
+        DublinCore.IDENTIFIER,
+        DublinCore.LANGUAGE,
+        DublinCore.MODIFIED,
+        DublinCore.PUBLISHER,
+        DublinCore.RELATION,
+        DublinCore.RIGHTS,
+        DublinCore.SOURCE,
+        DublinCore.SUBJECT,
+        DublinCore.TITLE,
+        DublinCore.TYPE
+    );
+
     private String DEFAULT_XSLT = "xml/metadataManager.xsl";
     
-    public String getName() {
+    private File metadataFile = null;
+    private String collectionName = "";
+    private String accessionNumber = "";
+    private HashMap<String, Metadata> annotatedFiles = new HashMap<String, Metadata>(); //Hash key is the file's absolute path
+    
+    public static String getName() {
         return "Full Metadata";
     }
 
-    public MetadataManager(File metadataFile, String collectionName, String accessionNumber) throws Exception {
+    public MetadataManager(File metadataFile, String collectionName, String accessionNumber) {
+        this.metadataFile = metadataFile;
+        this.collectionName = collectionName;
+        this.accessionNumber = accessionNumber;
+    }
+    
+    public MetadataManager() {
+        
+    }
+ 
+    public void open() throws Exception {
         xmlFile = metadataFile;
         xmlFile.getParentFile().mkdirs(); //In case it doesn't exist
         if (!xmlFile.exists() || xmlFile.length() == 0) {
@@ -80,7 +123,7 @@ public class MetadataManager {
         currentElement = document.getRootElement()
                 .getChild("accession", DEFAULT_NAMESPACE);
     }
- 
+    
     public void close() {
         FileOutputStream stream = null;
         OutputStreamWriter osw = null;
@@ -129,6 +172,7 @@ public class MetadataManager {
         }
         fileNode.setAttribute("size", String.valueOf(file.length()));
         currentElement = fileNode;
+        processFileAnnotations(file);
     }
 
     public void startDirectory(File directory) {
@@ -144,6 +188,7 @@ public class MetadataManager {
         
         currentElement.addContent(newDir);
         currentElement = newDir;
+        processFileAnnotations(directory);
     }
 
     public void closeCurrentElement() {
@@ -169,5 +214,32 @@ public class MetadataManager {
             return false;
         }
         return true;
+    }
+    
+       
+    public Metadata getFileAnnotation(File file){
+        if(annotatedFiles.containsKey(file.getAbsolutePath())){
+            return annotatedFiles.get(file.getAbsolutePath());
+        } else {
+            return new Metadata();
+        }
+    }
+    
+    public void setFileAnnotation(File file, Metadata metadata){
+        annotatedFiles.put(file.getAbsolutePath(), metadata);
+    }
+    
+    private void processFileAnnotations(File file){
+        Metadata metadata = getFileAnnotation(file);
+        if(metadata.size() < 1){return;} //Nothing to do here.
+        Element dcDescription = new Element("description", DC_XML);
+        for(Property property: DC_ELEMENTS){
+            for(String value: metadata.getValues(property)){
+                Element dcStatement = new Element(property.getName(), DC_NAMESPACE);
+                dcStatement.addContent(value);
+                dcDescription.addContent(dcStatement);
+            }
+        }
+        currentElement.addContent(dcDescription);
     }
 }

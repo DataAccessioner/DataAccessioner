@@ -19,7 +19,6 @@
 
 package org.dataaccessioner;
 
-import com.sun.jmx.remote.internal.ArrayQueue;
 import edu.harvard.hul.ois.fits.Fits;
 import edu.harvard.hul.ois.fits.exceptions.FitsException;
 import java.io.File;
@@ -33,7 +32,6 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.openide.util.Exceptions;
 
@@ -157,6 +155,7 @@ public class DataAccessioner {
             File metadata = new File(accnDir, accessionNumber + ".xml");
 
             metadataManager = new MetadataManager(metadata, collectionName, accessionNumber);
+            metadataManager.open();
             migrator.setMetadataManager(metadataManager);
             migrator.setFits(fits);
             System.out.println("Starting Migrator");
@@ -186,5 +185,5 @@ public class DataAccessioner {
         HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp("dataAccessioner [options] [destination] [source] [additional sources...]", opts);
     }
-    
+
 }
