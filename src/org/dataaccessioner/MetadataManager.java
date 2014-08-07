@@ -60,7 +60,7 @@ public class MetadataManager {
     
     private static final Namespace DC_NAMESPACE = Namespace.getNamespace("dc","http://purl.org/dc/elements/1.1/");
     private static final Namespace DC_XML = Namespace.getNamespace("dcx","http://purl.org/dc/xml/");
-    private static final List<Property> DC_ELEMENTS = Arrays.asList(
+    protected static final List<Property> DC_ELEMENTS = Arrays.asList(
         DublinCore.CONTRIBUTOR,
         DublinCore.COVERAGE,
         DublinCore.CREATED,
