@@ -185,5 +185,19 @@ public class DataAccessioner {
         HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp("dataAccessioner [options] [destination] [source] [additional sources...]", opts);
     }
+    
+    public void startFits(){
+        if(fits == null){
+            try {
+                fits = new Fits();
+            } catch (FitsException ex) {
+                logger.warn(ex.getMessage());
+            }
+        }
+    }
+    
+    public Fits getFits(){
+        return fits;
+    }
 
 }

@@ -19,10 +19,13 @@
 
 package org.dataaccessioner;
 
-import de.schlichtherle.io.swing.JFileTree;
 import java.awt.Dimension;
+import java.io.File;
+import java.util.Arrays;
+import java.util.Date;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -38,10 +41,19 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
-import javax.swing.JTree;
 import javax.swing.LayoutStyle;
 import javax.swing.SwingConstants;
+import javax.swing.UIManager;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.TreeModel;
+import org.apache.tika.metadata.Property;
+import org.netbeans.swing.outline.DefaultOutlineModel;
+import org.netbeans.swing.outline.Outline;
+import org.netbeans.swing.outline.OutlineModel;
+import org.netbeans.swing.outline.RenderDataProvider;
+import org.netbeans.swing.outline.RowModel;
 
 /**
  *
@@ -85,19 +97,22 @@ public class DASwingView extends javax.swing.JFrame {
     
     private JLabel srcIdLbl = new JLabel("Source Name/Identifier");
     private JTextField srcIdTxt = new JTextField();
-    private JScrollPane srcViewSC = new JScrollPane();
+    private Outline srcOutline = new Outline();
+    private JScrollPane srcViewSC = new JScrollPane(srcOutline);
     
     private JPanel dcPanel = new JPanel();
     private JLabel dcPanelLbl = new JLabel("File/Folder Dublin Core Metadata");
     private JLabel dcElementsLbl = new JLabel("Dublin Core Element");
-    private JComboBox dcElementsCB = new JComboBox(MetadataManager.DC_ELEMENTS.toArray());
+    private JComboBox dcElementsCB = new JComboBox();
     private JLabel dcValueLbl = new JLabel("Metadata Value");
     private JTextArea dcValueTxtA = new JTextArea(5, 20);
     private JScrollPane dcValueSP = new JScrollPane(dcValueTxtA);
     private JButton addDCBtn = new JButton("Add New");
     private JButton rmvDCBtn = new JButton("Remove Selected");
-    private JScrollPane dcEntriesSP = new JScrollPane();
-    private JTable dcEntriesTbl = new JTable(4, 2);
+    private final String[] colHeadings = {"Element","Value"};
+    private DefaultTableModel dcEntriesTblModel = new DefaultTableModel(colHeadings, 0);
+    private JTable dcEntriesTbl = new JTable(dcEntriesTblModel);
+    private JScrollPane dcEntriesSP = new JScrollPane(dcEntriesTbl);
     
     private JPanel cmdBtnPanel = new JPanel();
     private JButton migrateBtn = new JButton("Migrate");
@@ -109,27 +124,68 @@ public class DASwingView extends javax.swing.JFrame {
     private JLabel statusLbl = new JLabel();
     private JProgressBar statusPB = new JProgressBar(SwingConstants.HORIZONTAL, 0, 100);
     
+    private DataAccessioner da;
     
     public DASwingView() {
         super();
-        
+        this.da = new DataAccessioner();
+        da.startFits();
         initComponents();
-        
-        // status bar initialization - message timeout, idle icon and busy animation, etc
-        
-        // connecting action tasks to status bar via TaskMonitor
-        
-        //File Tree Icons
-        
-        //Add Size & Last modified listeners
-        
-        //
+        //TEST Set Source
+        setSource(new File("C:\\Users\\sshaw6\\Dropbox\\Family"));
+    }
+    
+    public DASwingView(DataAccessioner da){
+        super();
+        this.da = da;
+        initComponents();
     }
     
     //ACTIONS
-    
-    //Setup FITS tool menu
-    
+        //Migrate
+        //Cancel
+        //Clear Source
+        //Clear All
+        //Exit
+        //About
+        //(Un)select tool from menu
+        //Add DC to existing item
+            // Best strategy right now is to maintain the model & actual data separately. Creating a custom model was getting too unweildy
+        //Remove selected DC from existing item
+        //Update Item Pane when tree node is selected
+        // Select accession directory 
+        // Select source to migrate
+    private void setSource(File file){
+        srcIdTxt.setText(file.getName());
+        /**
+         * Thanks to both the posters @
+         * http://stackoverflow.com/questions/2841183/access-tree-object-in-netbeans-outline/2841582
+         * 
+         * & Geertjan Wielenga @
+         * https://blogs.oracle.com/geertjan/entry/swing_outline_component
+         */
+        TreeModel srcTreeMdl = new FileTreeModel(file);
+        OutlineModel mdl = DefaultOutlineModel.createOutlineModel(
+                srcTreeMdl, new FileRowModel(), true, file.getName());
+
+        srcOutline = new Outline();
+        srcOutline.setRootVisible(true);
+        srcOutline.setModel(mdl);
+        srcOutline.setRenderDataProvider(new RenderData());
+        srcOutline.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            //Modify to update the Item DC panel
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                int row = srcOutline.getSelectedRow();
+                File f = (File) srcOutline.getValueAt(row, 0);
+                if (!e.getValueIsAdjusting()) {
+                    System.out.println(row + ": " + f);
+                }
+            }
+        });
+        srcViewSC.setViewportView(srcOutline);
+    }
+        //Add Fits menu item tool tip (to rid us of null info)
     
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
@@ -176,7 +232,16 @@ public class DASwingView extends javax.swing.JFrame {
         fileMenu.add(new JSeparator());
         fileMenu.add(exitMI);
         menuBar.add(fileMenu);
-        menuBar.add(fitsMenu); //Initialized elsewhere
+        for(edu.harvard.hul.ois.fits.tools.Tool tool: da.getFits().getToolbelt().getTools()){
+            JCheckBoxMenuItem item = new JCheckBoxMenuItem(tool.getName());
+            item.setSelected(true);
+            item.setToolTipText(tool.getName()
+                    +" v. "+tool.getToolInfo().getVersion()
+                    +" ("+tool.getToolInfo().getDate()
+                    +") "+tool.getToolInfo().getNote());
+            fitsMenu.add(item);
+        }
+        menuBar.add(fitsMenu);
         setJMenuBar(menuBar);
         
         //Accession Panel
@@ -226,9 +291,9 @@ public class DASwingView extends javax.swing.JFrame {
         srcTlBr.add(dispItmSizeTBtn);
         srcTlBr.add(dispItmModTBtn);
         
-        JTree blankTree = new JTree();
-        blankTree.setModel(null);
-        srcViewSC.setViewportView(blankTree); //Add Option window pane!!
+//        JTree blankTree = new JTree();
+//        blankTree.setModel(null);
+//        srcViewSC.setViewportView(blankTree); //Add Option window pane!!
         
         GroupLayout srcLayout = new GroupLayout(srcPanel);
         srcPanel.setLayout(srcLayout);
@@ -249,7 +314,11 @@ public class DASwingView extends javax.swing.JFrame {
                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(srcViewSC));
         
-        //Item/Dublin Core Pane Layout
+        //Item/Dublin Core Pane & Layout
+        for(Property prop: MetadataManager.DC_ELEMENTS){
+            dcElementsCB.addItem(prop.getName());
+        }
+        
         GroupLayout dcLayout = new GroupLayout(dcPanel);
         dcPanel.setLayout(dcLayout);
         dcLayout.setHorizontalGroup(dcLayout.createParallelGroup()
@@ -333,6 +402,170 @@ public class DASwingView extends javax.swing.JFrame {
                 .addComponent(cmdBtnPanel)
                 .addComponent(statusPanel)
         );
+        
+        // status bar initialization - message timeout, idle icon and busy animation, etc
+        
+        // connecting action tasks to status bar via TaskMonitor
+        
+        //File Tree Icons
+        
+        //Add Size & Last modified listeners
+        
+        pack();
+
+    }
+
+    private void setStatusMsg(String message) {
+        statusLbl.setText(message);
+    }
+
+    private static class FileTreeModel implements TreeModel {
+
+        private File root;
+
+        public FileTreeModel(File root) {
+            this.root = root;
+        }
+
+        @Override
+        public void addTreeModelListener(javax.swing.event.TreeModelListener l) {
+            //do nothing
+        }
+
+        @Override
+        public Object getChild(Object parent, int index) {
+            File f = (File) parent;
+            return f.listFiles()[index];
+        }
+
+        @Override
+        public int getChildCount(Object parent) {
+            File f = (File) parent;
+            if (!f.isDirectory()) {
+                return 0;
+            } else {
+                return f.list().length;
+            }
+        }
+
+        @Override
+        public int getIndexOfChild(Object parent, Object child) {
+            File par = (File) parent;
+            File ch = (File) child;
+            return Arrays.asList(par.listFiles()).indexOf(ch);
+        }
+
+        @Override
+        public Object getRoot() {
+            return root;
+        }
+
+        @Override
+        public boolean isLeaf(Object node) {
+            File f = (File) node;
+            return !f.isDirectory();
+        }
+
+        @Override
+        public void removeTreeModelListener(javax.swing.event.TreeModelListener l) {
+            //do nothing
+        }
+
+        @Override
+        public void valueForPathChanged(javax.swing.tree.TreePath path, Object newValue) {
+            //do nothing
+        }
+
+    }
+ 
+    private class FileRowModel implements RowModel {
+
+        @Override
+        public Class getColumnClass(int column) {
+            switch (column) {
+                case 0:
+                    return Date.class;
+                case 1:
+                    return Long.class;
+                default:
+                    assert false;
+            }
+            return null;
+        }
+
+        @Override
+        public int getColumnCount() {
+            return 2;
+        }
+
+        @Override
+        public String getColumnName(int column) {
+            return column == 0 ? "Date" : "Size (bytes)";
+        }
+
+        @Override
+        public Object getValueFor(Object node, int column) {
+            File f = (File) node;
+            switch (column) {
+                case 0:
+                    return new Date(f.lastModified()); //UPDATE to ISO date/time display
+                case 1:
+                    return new Long(f.length()); //Possible UPDATE to pretty file sizes?
+                default:
+                    assert false;
+            }
+            return null;
+        }
+
+        @Override
+        public boolean isCellEditable(Object node, int column) {
+            return false;
+        }
+
+        @Override
+        public void setValueFor(Object node, int column, Object value) {
+            //do nothing for now
+        }
+
+    }
+
+    private class RenderData implements RenderDataProvider {
+
+        @Override
+        public java.awt.Color getBackground(Object o) {
+            return null;
+        }
+
+        @Override
+        public String getDisplayName(Object o) {
+            return ((File) o).getName();
+        }
+
+        @Override
+        public java.awt.Color getForeground(Object o) {
+            File f = (File) o;
+            if (!f.isDirectory() && !f.canWrite()) {
+                return UIManager.getColor("controlShadow");
+            }
+            return null;
+        }
+
+        @Override
+        public javax.swing.Icon getIcon(Object o) {
+            return null;
+
+        }
+
+        @Override
+        public String getTooltipText(Object o) {
+            File f = (File) o;
+            return f.getAbsolutePath();
+        }
+
+        @Override
+        public boolean isHtmlDisplayName(Object o) {
+            return false;
+        }
 
     }
 }
