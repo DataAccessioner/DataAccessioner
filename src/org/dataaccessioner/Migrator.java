@@ -132,6 +132,7 @@ public class Migrator {
             metadataManager.close();
         } catch (FileNotFoundException ex) {
             setStatusMessage(ex.getLocalizedMessage());
+            warnings.add(statusMessage);
             return STATUS_FAILURE;
         } catch (Exception ex) {
             setStatusMessage("Unexpected Failure: " + ex.getLocalizedMessage());
@@ -356,4 +357,6 @@ public class Migrator {
     public void addExclusion(File file){
         excludedItems.add(file.getAbsolutePath());
     }
+    
+    
 }

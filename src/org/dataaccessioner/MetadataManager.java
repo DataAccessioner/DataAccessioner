@@ -235,7 +235,8 @@ public class MetadataManager {
         Element dcDescription = new Element("description", DC_XML);
         for(Property property: DC_ELEMENTS){
             for(String value: metadata.getValues(property)){
-                Element dcStatement = new Element(property.getName(), DC_NAMESPACE);
+                
+                Element dcStatement = new Element(property.getName().substring(property.getName().indexOf(":")+1), DC_NAMESPACE);
                 dcStatement.addContent(value);
                 dcDescription.addContent(dcStatement);
             }

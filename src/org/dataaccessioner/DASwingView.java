@@ -19,18 +19,33 @@
 
 package org.dataaccessioner;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javax.swing.GroupLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
@@ -39,15 +54,20 @@ import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.LayoutStyle;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingWorker;
+import javax.swing.Timer;
 import javax.swing.UIManager;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.SoftBevelBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.DefaultTableModel;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.tree.TreeModel;
+import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.Property;
 import org.netbeans.swing.outline.DefaultOutlineModel;
 import org.netbeans.swing.outline.Outline;
@@ -61,12 +81,19 @@ import org.netbeans.swing.outline.RowModel;
  */
 public class DASwingView extends javax.swing.JFrame {
     
-    //Components
+    //For building the migration
+    private DataAccessioner da;
+    private Set<File> excludedFiles = new HashSet<File>();
+    private Map<File,List<Pair>> fileMetadata = new HashMap<File,List<Pair>>();
+    private MigrationTask migration;
+    private List<String> warnings = new ArrayList<String>();
+    
+    //GUI Components
     private JPanel mainPanel = new JPanel();
     
     private JMenuBar menuBar = new JMenuBar();
     private JMenu fileMenu = new JMenu("File");
-    private JMenuItem clearSourceMI = new JMenuItem("Clear Source Information");
+    private JMenuItem clearSrcMI = new JMenuItem("Clear Source Information");
     private JMenuItem clearAllMI = new JMenuItem("Clear All");
     private JMenuItem aboutMI = new JMenuItem("About...");
     private JMenuItem exitMI = new JMenuItem("Exit");
@@ -90,12 +117,9 @@ public class DASwingView extends javax.swing.JFrame {
     private JButton srcSelectBtn = new JButton("Source/Directory");
     private JButton excludeItmBtn = new JButton("Exclude");
     private JButton includeItmBtn = new JButton("Include");
-    private JSeparator srcTlBrDiv = new JSeparator(SwingConstants.VERTICAL);
-    private JLabel srcTlBrLbl = new JLabel("Display:");
-    private JToggleButton dispItmSizeTBtn = new JToggleButton("Size");
-    private JToggleButton dispItmModTBtn = new JToggleButton("Last Modified");
     
     private JLabel srcIdLbl = new JLabel("Source Name/Identifier");
+    private File currentSrc = null;
     private JTextField srcIdTxt = new JTextField();
     private Outline srcOutline = new Outline();
     private JScrollPane srcViewSC = new JScrollPane(srcOutline);
@@ -109,8 +133,8 @@ public class DASwingView extends javax.swing.JFrame {
     private JScrollPane dcValueSP = new JScrollPane(dcValueTxtA);
     private JButton addDCBtn = new JButton("Add New");
     private JButton rmvDCBtn = new JButton("Remove Selected");
-    private final String[] colHeadings = {"Element","Value"};
-    private DefaultTableModel dcEntriesTblModel = new DefaultTableModel(colHeadings, 0);
+    private File dcCurrentFile = null;
+    private DCTableModel dcEntriesTblModel = new DCTableModel(new ArrayList<Pair>());
     private JTable dcEntriesTbl = new JTable(dcEntriesTblModel);
     private JScrollPane dcEntriesSP = new JScrollPane(dcEntriesTbl);
     
@@ -123,16 +147,12 @@ public class DASwingView extends javax.swing.JFrame {
     private JPanel statusPanel = new JPanel();
     private JLabel statusLbl = new JLabel();
     private JProgressBar statusPB = new JProgressBar(SwingConstants.HORIZONTAL, 0, 100);
-    
-    private DataAccessioner da;
-    
+       
     public DASwingView() {
         super();
         this.da = new DataAccessioner();
         da.startFits();
         initComponents();
-        //TEST Set Source
-        setSource(new File("C:\\Users\\sshaw6\\Dropbox\\Family"));
     }
     
     public DASwingView(DataAccessioner da){
@@ -141,21 +161,11 @@ public class DASwingView extends javax.swing.JFrame {
         initComponents();
     }
     
-    //ACTIONS
-        //Migrate
-        //Cancel
-        //Clear Source
-        //Clear All
-        //Exit
-        //About
-        //(Un)select tool from menu
-        //Add DC to existing item
-            // Best strategy right now is to maintain the model & actual data separately. Creating a custom model was getting too unweildy
-        //Remove selected DC from existing item
-        //Update Item Pane when tree node is selected
-        // Select accession directory 
-        // Select source to migrate
     private void setSource(File file){
+        if (file == null){
+            return;
+        }
+        currentSrc = file;
         srcIdTxt.setText(file.getName());
         /**
          * Thanks to both the posters @
@@ -170,6 +180,7 @@ public class DASwingView extends javax.swing.JFrame {
 
         srcOutline = new Outline();
         srcOutline.setRootVisible(true);
+        srcOutline.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         srcOutline.setModel(mdl);
         srcOutline.setRenderDataProvider(new RenderData());
         srcOutline.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
@@ -179,7 +190,7 @@ public class DASwingView extends javax.swing.JFrame {
                 int row = srcOutline.getSelectedRow();
                 File f = (File) srcOutline.getValueAt(row, 0);
                 if (!e.getValueIsAdjusting()) {
-                    System.out.println(row + ": " + f);
+                    updateDCPane(f);
                 }
             }
         });
@@ -218,33 +229,114 @@ public class DASwingView extends javax.swing.JFrame {
         });
     }
 
-    private void initComponents() { //ADD Actions!!
+    private void initComponents() {
+        this.setTitle(da.getName()+" v. "+da.getVersion());
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        Dimension preferredSize = new Dimension(450,768);
+        Dimension preferredSize = new Dimension(500,768);
         this.setPreferredSize(preferredSize);
         this.setSize(preferredSize);
         
+        //Stand-alone Action Listeners
+        ActionListener clearAllListen = new ActionListener() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                clearAll();
+            }
+        };
+        clearAllBtn.addActionListener(clearAllListen);
+        clearAllMI.addActionListener(clearAllListen);
+        
+        ActionListener clearSrcListen = new ActionListener() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                clearSource(true);
+            }
+        };
+        clearSrcMI.addActionListener(clearSrcListen);
+        clearSrcBtn.addActionListener(clearSrcListen);
+        
         //Menus
+        aboutMI.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //TODO add a pop-up window or dialog with notes on the application
+            }
+        });
         fileMenu.add(aboutMI);
         fileMenu.add(new JSeparator());
-        fileMenu.add(clearSourceMI);
+        fileMenu.add(clearSrcMI);
         fileMenu.add(clearAllMI);
         fileMenu.add(new JSeparator());
+        exitMI.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
+            }
+        
+        });
         fileMenu.add(exitMI);
         menuBar.add(fileMenu);
-        for(edu.harvard.hul.ois.fits.tools.Tool tool: da.getFits().getToolbelt().getTools()){
+        for (edu.harvard.hul.ois.fits.tools.Tool tool : da.getFits().getToolbelt().getTools()) {
+            ItemListener toolsListener = new ItemListener() {
+                @Override
+                public void itemStateChanged(ItemEvent e) {
+                    int state = e.getStateChange();
+                    boolean selected = (state == ItemEvent.SELECTED);
+                    JMenuItem source = (JMenuItem) e.getSource();
+                    for (edu.harvard.hul.ois.fits.tools.Tool tool : da.getFits().getToolbelt().getTools()) {
+                        if (source.getText().equals(tool.getName())) {
+                            tool.setEnabled(selected);
+                        }
+                    }
+                }
+            };
             JCheckBoxMenuItem item = new JCheckBoxMenuItem(tool.getName());
             item.setSelected(true);
             item.setToolTipText(tool.getName()
                     +" v. "+tool.getToolInfo().getVersion()
                     +" ("+tool.getToolInfo().getDate()
                     +") "+tool.getToolInfo().getNote());
+            item.addItemListener(toolsListener);
             fitsMenu.add(item);
         }
+        fitsMenu.add(new JSeparator());
+        JMenuItem selectAllToolsMI = new JMenuItem("Select all");
+        selectAllToolsMI.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                for(java.awt.Component comp: fitsMenu.getMenuComponents()){
+                    if(comp instanceof JCheckBoxMenuItem){
+                        JCheckBoxMenuItem checkbox = (JCheckBoxMenuItem) comp;
+                        checkbox.setSelected(true);
+                    }
+                }
+            }
+        });
+        fitsMenu.add(selectAllToolsMI);
+        JMenuItem selectNoToolsMI = new JMenuItem("De-select all");
+        selectNoToolsMI.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                for(java.awt.Component comp: fitsMenu.getMenuComponents()){
+                    if(comp instanceof JCheckBoxMenuItem){
+                        JCheckBoxMenuItem checkbox = (JCheckBoxMenuItem) comp;
+                        checkbox.setSelected(false);
+                    }
+                }
+            }
+        });
+        fitsMenu.add(selectNoToolsMI);
         menuBar.add(fitsMenu);
         setJMenuBar(menuBar);
         
         //Accession Panel
+        accnDirBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setAccessionDir();
+            }
+        });
+        
         GroupLayout accnLayout = new GroupLayout(accnPanel);
         accnPanel.setLayout(accnLayout);
         accnLayout.setHorizontalGroup(accnLayout.createSequentialGroup()
@@ -276,24 +368,34 @@ public class DASwingView extends javax.swing.JFrame {
         );
                
         //Source Pane w/ Layout
-        srcSelectBtn.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
-        excludeItmBtn.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
-        includeItmBtn.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
-        dispItmSizeTBtn.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
-        dispItmModTBtn.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        srcSelectBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                selectSrc();
+            }
+        });
+        excludeItmBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                excludedFiles.add(dcCurrentFile);
+                srcOutline.repaint();
+            }
+        });
+        includeItmBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                excludedFiles.remove(dcCurrentFile);
+                srcOutline.repaint();
+            }
+        });
+        srcSelectBtn.setBorder(new SoftBevelBorder(BevelBorder.RAISED));
+        excludeItmBtn.setBorder(new SoftBevelBorder(BevelBorder.RAISED));
+        includeItmBtn.setBorder(new SoftBevelBorder(BevelBorder.RAISED));
         srcTlBr.setBorder(null);
         srcTlBr.setRollover(true);
         srcTlBr.add(srcSelectBtn);
         srcTlBr.add(excludeItmBtn);
         srcTlBr.add(includeItmBtn);
-        srcTlBr.add(srcTlBrDiv);
-        srcTlBr.add(srcTlBrLbl);
-        srcTlBr.add(dispItmSizeTBtn);
-        srcTlBr.add(dispItmModTBtn);
-        
-//        JTree blankTree = new JTree();
-//        blankTree.setModel(null);
-//        srcViewSC.setViewportView(blankTree); //Add Option window pane!!
         
         GroupLayout srcLayout = new GroupLayout(srcPanel);
         srcPanel.setLayout(srcLayout);
@@ -315,9 +417,39 @@ public class DASwingView extends javax.swing.JFrame {
                 .addComponent(srcViewSC));
         
         //Item/Dublin Core Pane & Layout
+        
+        //File Tree Icons
+        UIManager.put("exclude.icon", new ImageIcon(getClass().getResource("resources/exclude.gif")));
+        UIManager.put("exclude_hidden.icon", new ImageIcon(getClass().getResource("resources/exclude_hidden.gif")));
+        UIManager.put("folder.icon", new ImageIcon(getClass().getResource("resources/folder.gif")));
+        UIManager.put("folder_hidden.icon", new ImageIcon(getClass().getResource("resources/folder_hidden.gif")));
+        UIManager.put("file.icon", new ImageIcon(getClass().getResource("resources/file.gif")));
+        UIManager.put("file_hidden.icon", new ImageIcon(getClass().getResource("resources/file_hidden.gif")));
+        
         for(Property prop: MetadataManager.DC_ELEMENTS){
             dcElementsCB.addItem(prop.getName());
         }
+        //Add DC to existing item
+        addDCBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String value = dcValueTxtA.getText();
+                if(value == null || value.isEmpty()){ //No empties!
+                    return;
+                }
+                
+                dcEntriesTblModel.addRow(new Pair((String)dcElementsCB.getSelectedItem(),value));
+                dcValueTxtA.setText(""); //Clear box for new value
+            }
+        });
+        //Remove selected DC from existing item
+        rmvDCBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dcEntriesTblModel.removePairs(dcEntriesTbl.getSelectedRows());
+            }
+        });
+        
         
         GroupLayout dcLayout = new GroupLayout(dcPanel);
         dcPanel.setLayout(dcLayout);
@@ -350,14 +482,37 @@ public class DASwingView extends javax.swing.JFrame {
                 .addComponent(dcEntriesSP)
         );
 
-        
         //Source/Item Split Pane (variable size, expand to fill)
         srcItmSP.setTopComponent(srcPanel);
         srcItmSP.setBottomComponent(dcPanel);
         srcItmSP.setDividerLocation(300);
         srcItmSP.setOrientation(JSplitPane.VERTICAL_SPLIT);
-        
+
         //Command Button Pane (fixed size, stuck to bottom)
+        //TODO Migrate Button
+        migrateBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(migrationSanityCheck()){
+                    migration = new MigrationTask();
+                    migration.execute();
+                } else{
+                    setStatusMsg("Couldn't run the migration.");
+                }
+            }
+        });
+        //TODO Cancel Button
+        cancelBtn.setEnabled(false);
+        cancelBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (migration == null || migration.isDone()) {
+                    return;
+                } else {
+                    migration.cancel(true);
+                }
+            }
+        });
         GroupLayout cmdLayout = new GroupLayout(cmdBtnPanel);
         cmdBtnPanel.setLayout(cmdLayout);
         cmdLayout.setHorizontalGroup(cmdLayout.createSequentialGroup()
@@ -403,14 +558,6 @@ public class DASwingView extends javax.swing.JFrame {
                 .addComponent(statusPanel)
         );
         
-        // status bar initialization - message timeout, idle icon and busy animation, etc
-        
-        // connecting action tasks to status bar via TaskMonitor
-        
-        //File Tree Icons
-        
-        //Add Size & Last modified listeners
-        
         pack();
 
     }
@@ -419,6 +566,261 @@ public class DASwingView extends javax.swing.JFrame {
         statusLbl.setText(message);
     }
 
+    public void clearAll() {
+        int response = JOptionPane.showConfirmDialog(this,
+                "Are you sure you want to clear the source and accession information?\n"
+                    + "This will remove all the Dublin Core Metadata and \n"
+                    + "exclusion settings you have entered!",
+                "Confirm Clear All",
+                JOptionPane.YES_NO_OPTION);
+        if (response == JOptionPane.YES_OPTION) {
+            //Clear top portion
+            nameTxt.setText("");
+            accnNumTxt.setText("");
+            accnDirTxt.setText("");
+            collTitleTxt.setText("");
+            //Clear Source
+            clearSource(false);
+        }
+    }
+    
+    public void clearSource(boolean confirmation) {
+        int response = JOptionPane.YES_OPTION; //Yes, we want to do it unless confirmed otherwise.
+
+        if (confirmation) { //Check if we really should be getting a confirmation.
+            response = JOptionPane.showConfirmDialog(this,
+                    "Are you sure you want to clear the source information?\n"
+                    + "This will remove all the Dublin Core Metadata and \n"
+                    + "exclusion settings you have entered!",
+                    "Confirm Clear Source",
+                    JOptionPane.YES_NO_OPTION);
+        }
+
+        if (response == JOptionPane.YES_OPTION) {
+            fileMetadata.clear();
+            excludedFiles.clear();
+            srcViewSC.setViewportView(null);
+            srcIdTxt.setText("");
+            updateDCPane(null);
+            this.repaint();
+        }
+    }
+    
+    private void updateDCPane(File file){
+        //Clear entry
+        dcValueTxtA.setText("");
+        //Save away
+        fileMetadata.put(dcCurrentFile, dcEntriesTblModel.getMetadata());
+        //Load new
+        dcCurrentFile = file;
+        List<Pair> metadata = fileMetadata.get(file);
+        if(metadata == null){
+            metadata = new ArrayList<Pair>();
+        }
+        dcEntriesTblModel = new DCTableModel(metadata);
+        dcEntriesTbl.setModel(dcEntriesTblModel);
+        dcEntriesSP.setViewportView(dcEntriesTbl);
+    }
+    
+    private void selectSrc() {
+            setStatusMsg("Trying to load a new disk or directory...");
+            statusPB.setIndeterminate(true);
+            JFileChooser fc = new JFileChooser();
+            fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            fc.setApproveButtonText("Select Disk/Directory to Migrate");
+            if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+                File file = fc.getSelectedFile();
+                if (!file.isDirectory()) {
+                    JOptionPane.showMessageDialog(this,
+                            "The selected directory is invalid.\n" +
+                            "Select a valid directory.",
+                            "Invalid Source Disk/Directory",
+                            JOptionPane.ERROR_MESSAGE);
+                    setStatusMsg("Failed to load "+file.getName());
+                    statusPB.setIndeterminate(false);
+                    return;
+                }
+                setSource(file);
+                setStatusMsg(file.getName()+"is loaded.");
+                statusPB.setIndeterminate(false);
+            }
+    }
+    
+    private void setAccessionDir() {
+        JFileChooser fc = new JFileChooser();
+        fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        fc.setApproveButtonText("Set as Accessions Directory");
+        int returnVal = fc.showOpenDialog(this);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File file = fc.getSelectedFile();
+            if(!file.isDirectory() || !file.canWrite()){
+                JOptionPane.showMessageDialog(this,
+                        "The selected accessions directory is invalid or you cannot write to it." +
+                        " Select a valid directory.",
+                        "Invalid Accessions Directory",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            accnDirTxt.setText(file.getAbsolutePath());
+        }
+    }
+    
+    private boolean migrationSanityCheck() {
+        //Sanity Checks
+        if ((accnDirTxt.getText().equalsIgnoreCase(""))
+                || (nameTxt.getText().equalsIgnoreCase(""))
+                || (accnNumTxt.getText().equalsIgnoreCase(""))
+                || !(currentSrc.canRead())) {
+            JOptionPane.showMessageDialog(this,
+                    "All required fields must be entered.",
+                    "Invalid Options",
+                    JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        File accnDirRoot = new File(accnDirTxt.getText());
+        File accnNumDir = new File(accnDirRoot, accnNumTxt.getText());
+        if (currentSrc.getAbsolutePath().equalsIgnoreCase(accnNumDir.getAbsolutePath())) {
+            JOptionPane.showMessageDialog(this,
+                    "The destination cannot be the same as the source.",
+                    "Invalid Options",
+                    JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        if (srcIdTxt.getText().equals("")) {
+            JOptionPane.showMessageDialog(this,
+                    "Disk Name cannot be empty",
+                    "Metadata Error",
+                    JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+
+        if (new File(accnNumDir, srcIdTxt.getText()).exists()) {
+            JOptionPane.showMessageDialog(this,
+                    "Disk with the name " + srcIdTxt.getText()
+                    + " already exists.",
+                    "Metadata Error",
+                    JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        //Characters that don't play well with various file systems
+        String[] illegalCharacters = {
+            "<", ">", ":", "\"", "/", "\\", "|", "?", "*", ".", "!", "½"
+        };
+        for (String badCharacter : illegalCharacters) {
+            if (srcIdTxt.getText().contains(badCharacter)) {
+                JOptionPane.showMessageDialog(this,
+                        "You may not use any of the following characters"
+                        + " as the disk name: < > : \" / \\ | ? . ! * ½",
+                        "Illegal Characters in Disk Name",
+                        JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+        }
+        //These are protected names in Windows
+        String[] illegalNames = {
+            "com1", "com2", "com3", "com4", "com5", "com6", "com7", "com8",
+            "com9",
+            "lpt1", "lpt2", "lpt3", "lpt4", "lpt5", "lpt6", "lpt7", "lpt8",
+            "lpt9",
+            "con", "nul", "prn"
+        };
+        for (String badName : illegalNames) {
+            if (srcIdTxt.getText().equals(badName)) {
+                JOptionPane.showMessageDialog(this,
+                        "You may not use any of the following names "
+                        + "as the disk name: "
+                        + "com1, com2, com3, com4, com5, com6, com7, com8, com9, "
+                        + "lpt1, lpt2, lpt3, lpt4, lpt5, lpt6, lpt7, lpt8, lpt9, "
+                        + "con, nul, and prn.",
+                        "Illegal Characters in Disk Name",
+                        JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+        }
+        if (!currentSrc.canRead()) {
+            JOptionPane.showMessageDialog(this,
+                    "The disk/folder cannot be read, or has been removed or deleted."
+                    + " Please re-insert disk or cancel migration.",
+                    "Disk Missing",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+
+        return true; //If you got this far, you pass.
+    }
+
+    private void clearCancel(File destination) {
+        int answer = JOptionPane.showOptionDialog(this,
+                "You canceled the migration before it completed. "
+                + "Would you like to delete the transfered files? ",
+                "Migration Canceled",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.ERROR_MESSAGE,
+                null,
+                null,
+                null);
+        if (answer == 0) {
+            //Delete destination
+            if (!deleteRecursively(destination)) {
+                JOptionPane.showMessageDialog(this,
+                        "Unable to delete " + destination.getAbsolutePath(),
+                        "Error deleting destination",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        }
+        setStatusMsg("Migration Canceled!");
+    }
+
+    protected static boolean deleteRecursively(File toDelete) {
+        if (toDelete.isDirectory()) {
+            for (File child : toDelete.listFiles()) {
+                if (!deleteRecursively(child)) {
+                    return false;
+                }
+            }
+        }
+        return toDelete.delete();
+    }
+
+    private void displayWarnings(){
+        int answer = JOptionPane.showOptionDialog(this,
+                        "One or more errors occured during migration. " +
+                        "Details will be listed in the accession " +
+                        "metadata file. " +
+                        "Would you like to see a list of the errors now?",
+                        "Migration Errors Occured",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.ERROR_MESSAGE,
+                        null,
+                        null,
+                        null);
+                if (answer == 0) {
+                    Thread errorDisplayThread = new Thread(new Runnable() {
+
+                        JFrame errorFrame;
+
+                        public void run() {
+                            errorFrame = new JFrame("Migration Errors");
+                            JPanel errorPanel = new JPanel(new BorderLayout());
+                            errorFrame.add(errorPanel);
+                            JTextArea errorText = new JTextArea();
+                            JScrollPane errorScroll = new JScrollPane(errorText);
+                            errorScroll.setPreferredSize(new Dimension(450, 110));
+                            errorScroll.setMaximumSize(errorFrame.getMaximumSize());
+                            errorPanel.add(errorScroll, "Center");
+                            errorFrame.pack();
+                            errorFrame.setVisible(true);
+                            errorFrame.toFront();
+                            for (String warning : warnings) {
+                                errorText.append(warning + "\n");
+                            }
+
+                        }
+                    });
+                    errorDisplayThread.setName("ErrorFrame");
+                    errorDisplayThread.run();
+                }
+    }
+        
     private static class FileTreeModel implements TreeModel {
 
         private File root;
@@ -552,8 +954,26 @@ public class DASwingView extends javax.swing.JFrame {
 
         @Override
         public javax.swing.Icon getIcon(Object o) {
-            return null;
-
+            File f = (File) o;
+            if (excludedFiles.contains(f)){
+                if(f.isHidden()){
+                    return UIManager.getIcon("exclude_hidden.icon");
+                } else {
+                    return UIManager.getIcon("exclude.icon");
+                }
+            } else if (f.isDirectory()) {
+                if(f.isHidden()){
+                    return UIManager.getIcon("folder_hidden.icon");
+                } else {
+                    return UIManager.getIcon("folder.icon");
+                }
+            } else {
+                if(f.isHidden()){
+                    return UIManager.getIcon("file_hidden.icon");
+                } else {
+                    return UIManager.getIcon("file.icon");
+                }
+            }
         }
 
         @Override
@@ -567,5 +987,169 @@ public class DASwingView extends javax.swing.JFrame {
             return false;
         }
 
+    }
+
+    private class DCTableModel extends AbstractTableModel {
+        private String[] columnNames = {"Element","Value"};
+        private List<Pair> metadata;
+
+        public DCTableModel(List<Pair> listOfPairs) {
+            if(listOfPairs == null){
+                metadata = new ArrayList<Pair>();
+            } else {
+                metadata = listOfPairs;
+            }
+        }
+        
+        @Override
+        public int getRowCount() {
+            return metadata.size();
+        }
+
+        @Override
+        public int getColumnCount() {
+            return columnNames.length;
+        }
+
+        @Override
+        public Object getValueAt(int rowIndex, int columnIndex) {
+            return metadata.get(rowIndex).getValueAt(columnIndex);
+        }
+        
+        public void addRow(Pair pair){
+            metadata.add(pair);
+            int row = metadata.indexOf(pair);
+            fireTableCellUpdated(row, 0);
+            fireTableCellUpdated(row, 1);
+            fireTableRowsInserted(row, row);
+        }
+        
+        public void removeRow(int row) {
+            metadata.remove(row);
+            this.fireTableDataChanged();
+        }
+  
+        @Override
+        public String getColumnName(int columnIndex) {
+            return columnNames[columnIndex];
+        }
+
+        private List<Pair> getMetadata() {
+            return metadata;
+        }
+
+        private void removePairs(int[] selectedRows) {
+            //Need to collect all the pairs before attempting to remove them
+            //because the indicies may not match after the first removal.
+            List<Pair> toRemove = new ArrayList<Pair>();
+            for(int row: selectedRows){
+                toRemove.add(metadata.get(row));
+            }
+            //Now remove them one by one, using the *current* index
+            for(Pair pair: toRemove){
+                removeRow(metadata.indexOf(pair));
+            }
+        }
+    }
+    class Pair {
+        private final String element;
+        private final String value;
+        
+        public Pair(String anElement, String aValue){
+            element = anElement;
+            value = aValue;
+        }
+        
+        public String element(){return element;}
+        public String value()  {return value;}
+        public Object getValueAt(int index){
+            switch (index){
+                case 0: return element;
+                case 1: return value;
+                default: return null;
+            }
+        }
+    }
+    
+    class MigrationTask extends SwingWorker<String, Object> implements ActionListener{
+
+        Timer timer;
+        Migrator migrator = da.getMigrator();
+        File destination;
+        
+        @Override
+        protected String doInBackground() throws Exception {
+            setStatusMsg("Preparing migration ...");
+            statusPB.setIndeterminate(true);
+            enable(false);
+            //Run migrator
+            timer = new Timer(500, this); //Prod every half second
+            timer.start();
+            File accnRoot = new File(accnDirTxt.getText());
+            File accnDir = new File(accnRoot, accnNumTxt.getText());
+            File accnMetadataFile = new File(accnRoot, accnNumTxt.getText()+".xml");
+            destination = new File(accnDir, srcIdTxt.getText());
+            destination.mkdirs();
+            MetadataManager mm = new MetadataManager(accnMetadataFile, collTitleTxt.getText(), accnNumTxt.getText());
+            for(File annotatedFile: fileMetadata.keySet()){
+                if(annotatedFile == null){ //Oddly, the first key is always null
+                    continue;
+                }
+                Metadata annotations = new Metadata();
+                for(Pair pair: fileMetadata.get(annotatedFile)){
+                    annotations.add(pair.element, pair.value());
+                }
+                if(annotations.size() >0){
+                    //Not all annotatedFile listings have entries... FIX in updateDC
+                    mm.setFileAnnotation(annotatedFile, annotations);
+                }
+            }
+            try{
+                da.run(currentSrc, destination, mm, excludedFiles);
+            }
+            catch(Exception e){
+                cancelled();
+                setStatusMsg("ERROR! "+e.getLocalizedMessage());
+                return "FAIL!";
+            }
+            finished();
+
+            setStatusMsg("Success!");
+            return "Success!";
+        }
+
+        protected void cancelled() {
+            finished();
+            clearCancel(destination);
+        }
+        
+        protected void finished() {
+            timer.stop();
+            enable(true);
+            statusPB.setIndeterminate(false);
+            clearSource(false);
+            warnings = migrator.getWarnings();
+            if (warnings.size() > 0) {
+                displayWarnings();
+            }
+            migrator.getWarnings().clear();
+        }
+        
+        public void actionPerformed(ActionEvent e) {
+            if (migrator != null) {
+                //Eventually get a new progress monitor update
+                setStatusMsg(migrator.getStatusMessage());
+            }
+        }
+        
+        protected void enable(boolean enable) {
+            accnDirBtn.setEnabled(enable);
+            migrateBtn.setEnabled(enable);
+            clearAllBtn.setEnabled(enable);
+            clearAllMI.setEnabled(enable);
+            clearSrcBtn.setEnabled(enable);
+            clearSrcMI.setEnabled(enable);
+            cancelBtn.setEnabled(!enable); //Opposite the rest
+        }
     }
 }
