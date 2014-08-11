@@ -175,6 +175,11 @@ public class MetadataManager {
         processFileAnnotations(file);
     }
 
+    public void startFile(File file, String newName){
+        startFile(file);
+        currentElement.setAttribute("name", newName);
+    }
+    
     public void startDirectory(File directory) {
         Element newDir = new Element("folder", DEFAULT_NAMESPACE);
         newDir.setAttribute("name", directory.getName());
@@ -189,6 +194,12 @@ public class MetadataManager {
         currentElement.addContent(newDir);
         currentElement = newDir;
         processFileAnnotations(directory);
+    }
+    
+    public void startDirectory(File directory, String newName){
+        startDirectory(directory);
+        //Overwrite the existing name element.
+        currentElement.setAttribute("name", newName);
     }
 
     public void closeCurrentElement() {

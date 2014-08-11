@@ -639,7 +639,7 @@ public class DASwingView extends javax.swing.JFrame {
                     return;
                 }
                 setSource(file);
-                setStatusMsg(file.getName()+"is loaded.");
+                setStatusMsg(file.getName()+" is loaded.");
                 statusPB.setIndeterminate(false);
             }
     }

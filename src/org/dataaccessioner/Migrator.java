@@ -159,7 +159,7 @@ public class Migrator {
         statusMessage = "Migrating " + source.getPath();
         validateDirectory(source);
         validateDirectory(destination);
-        metadataManager.startDirectory(source);
+        metadataManager.startDirectory(source, destination.getName());
         for (File child : source.listFiles()) {
             if(isExcluded(child)){ // Ensure it shouldn't be skipped. Considering a redundant check at the beginning of both "processing" methods.
                 continue;
@@ -206,7 +206,7 @@ public class Migrator {
     }
 
     private int processFile(File source, File destination) {
-        metadataManager.startFile(source);
+        metadataManager.startFile(source, destination.getName());
         statusMessage = "Migrating " + source.getPath();
         if (!source.canRead()) {
             warnings.add("Unable to copy " + source.getAbsolutePath() + " (unreadable file).");
