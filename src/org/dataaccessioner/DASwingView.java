@@ -259,7 +259,7 @@ public class DASwingView extends javax.swing.JFrame {
         aboutMI.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //TODO add a pop-up window or dialog with notes on the application
+                new AboutBox().setVisible(true); 
             }
         });
         fileMenu.add(aboutMI);
@@ -489,7 +489,6 @@ public class DASwingView extends javax.swing.JFrame {
         srcItmSP.setOrientation(JSplitPane.VERTICAL_SPLIT);
 
         //Command Button Pane (fixed size, stuck to bottom)
-        //TODO Migrate Button
         migrateBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -501,7 +500,6 @@ public class DASwingView extends javax.swing.JFrame {
                 }
             }
         });
-        //TODO Cancel Button
         cancelBtn.setEnabled(false);
         cancelBtn.addActionListener(new ActionListener() {
             @Override
@@ -710,7 +708,7 @@ public class DASwingView extends javax.swing.JFrame {
             if (srcIdTxt.getText().contains(badCharacter)) {
                 JOptionPane.showMessageDialog(this,
                         "You may not use any of the following characters"
-                        + " as the disk name: < > : \" / \\ | ? . ! * ½",
+                        + " as the disk name:\n< > : \" / \\ | ? . ! * ½",
                         "Illegal Characters in Disk Name",
                         JOptionPane.ERROR_MESSAGE);
                 return false;
@@ -728,9 +726,9 @@ public class DASwingView extends javax.swing.JFrame {
             if (srcIdTxt.getText().equals(badName)) {
                 JOptionPane.showMessageDialog(this,
                         "You may not use any of the following names "
-                        + "as the disk name: "
-                        + "com1, com2, com3, com4, com5, com6, com7, com8, com9, "
-                        + "lpt1, lpt2, lpt3, lpt4, lpt5, lpt6, lpt7, lpt8, lpt9, "
+                        + "as the disk name: \n"
+                        + "com1, com2, com3, com4, com5, com6, com7, com8, com9, \n"
+                        + "lpt1, lpt2, lpt3, lpt4, lpt5, lpt6, lpt7, lpt8, lpt9, \n"
                         + "con, nul, and prn.",
                         "Illegal Characters in Disk Name",
                         JOptionPane.ERROR_MESSAGE);
@@ -739,7 +737,7 @@ public class DASwingView extends javax.swing.JFrame {
         }
         if (!currentSrc.canRead()) {
             JOptionPane.showMessageDialog(this,
-                    "The disk/folder cannot be read, or has been removed or deleted."
+                    "The disk/folder cannot be read, or has been removed or deleted.\n"
                     + " Please re-insert disk or cancel migration.",
                     "Disk Missing",
                     JOptionPane.ERROR_MESSAGE);
@@ -750,7 +748,7 @@ public class DASwingView extends javax.swing.JFrame {
 
     private void clearCancel(File destination) {
         int answer = JOptionPane.showOptionDialog(this,
-                "You canceled the migration before it completed. "
+                "You canceled the migration before it completed.\n"
                 + "Would you like to delete the transfered files? ",
                 "Migration Canceled",
                 JOptionPane.YES_NO_OPTION,
@@ -783,9 +781,9 @@ public class DASwingView extends javax.swing.JFrame {
 
     private void displayWarnings(){
         int answer = JOptionPane.showOptionDialog(this,
-                        "One or more errors occured during migration. " +
+                        "One or more errors occured during migration.\n" +
                         "Details will be listed in the accession " +
-                        "metadata file. " +
+                        "metadata file.\n" +
                         "Would you like to see a list of the errors now?",
                         "Migration Errors Occured",
                         JOptionPane.YES_NO_OPTION,
@@ -1134,14 +1132,14 @@ public class DASwingView extends javax.swing.JFrame {
             }
             migrator.getWarnings().clear();
         }
-        
+
         public void actionPerformed(ActionEvent e) {
             if (migrator != null) {
                 //Eventually get a new progress monitor update
                 setStatusMsg(migrator.getStatusMessage());
             }
         }
-        
+
         protected void enable(boolean enable) {
             accnDirBtn.setEnabled(enable);
             migrateBtn.setEnabled(enable);
@@ -1151,5 +1149,98 @@ public class DASwingView extends javax.swing.JFrame {
             clearSrcMI.setEnabled(enable);
             cancelBtn.setEnabled(!enable); //Opposite the rest
         }
+    }
+
+    public class AboutBox extends javax.swing.JFrame {
+
+        private javax.swing.JLabel devLbl;
+        private javax.swing.JLabel devVal;
+        private javax.swing.JLabel title;
+        private javax.swing.JLabel urlLbl;
+        private javax.swing.JLabel urlVal;
+        private javax.swing.JLabel versionLbl;
+        private javax.swing.JLabel versionVal;
+
+        public AboutBox() {
+            initComponents();
+        }
+
+        public void closeAboutBox() {
+            setVisible(false);
+        }
+
+        private void initComponents() {
+        title = new javax.swing.JLabel();
+        versionLbl = new javax.swing.JLabel();
+        devLbl = new javax.swing.JLabel();
+        urlLbl = new javax.swing.JLabel();
+        versionVal = new javax.swing.JLabel();
+        devVal = new javax.swing.JLabel();
+        urlVal = new javax.swing.JLabel();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        this.setTitle(da.getName()+" v. "+da.getVersion());
+
+        title.setFont(title.getFont().deriveFont(title.getFont().getStyle() | java.awt.Font.BOLD, title.getFont().getSize()+9));
+        title.setText(da.getName());
+
+        versionLbl.setFont(new java.awt.Font("Tahoma", 2, 11)); // NOI18N
+        versionLbl.setText("Version:");
+
+        devLbl.setFont(new java.awt.Font("Tahoma", 2, 11)); // NOI18N
+        devLbl.setText("Developer:");
+
+        urlLbl.setFont(new java.awt.Font("Tahoma", 2, 11)); // NOI18N
+        urlLbl.setText("Website:");
+
+        versionVal.setText(da.getVersion());
+
+        devVal.setText("Seth Shaw");
+
+        urlVal.setText("http://www.dataaccessioner.org");
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(title)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(devLbl)
+                            .addComponent(versionLbl)
+                            .addComponent(urlLbl))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(versionVal)
+                            .addComponent(devVal)
+                            .addComponent(urlVal))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(title)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(versionLbl)
+                    .addComponent(versionVal))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(devLbl)
+                    .addComponent(devVal))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(urlLbl)
+                    .addComponent(urlVal))
+                .addContainerGap(19, Short.MAX_VALUE))
+        );
+
+        pack();
+        }
+
     }
 }
