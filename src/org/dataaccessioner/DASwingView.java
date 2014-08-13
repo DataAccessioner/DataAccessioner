@@ -1098,7 +1098,7 @@ public class DASwingView extends javax.swing.JFrame {
                     annotations.add(pair.element, pair.value());
                 }
                 if(annotations.size() >0){
-                    //Not all annotatedFile listings have entries... FIX in updateDC
+                    //Not all annotatedFile listings have entries... TODO FIX in updateDC rather than here
                     mm.setFileAnnotation(annotatedFile, annotations);
                 }
             }

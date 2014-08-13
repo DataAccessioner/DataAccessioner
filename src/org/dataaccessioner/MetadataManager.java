@@ -63,14 +63,14 @@ public class MetadataManager {
     protected static final List<Property> DC_ELEMENTS = Arrays.asList(
         DublinCore.CONTRIBUTOR,
         DublinCore.COVERAGE,
-        DublinCore.CREATED,
+//        DublinCore.CREATED,  //TERMS element, not currently supported
         DublinCore.CREATOR,
         DublinCore.DATE,
         DublinCore.DESCRIPTION,
         DublinCore.FORMAT,
         DublinCore.IDENTIFIER,
         DublinCore.LANGUAGE,
-        DublinCore.MODIFIED,
+//        DublinCore.MODIFIED, //TERMS element, not currently supported
         DublinCore.PUBLISHER,
         DublinCore.RELATION,
         DublinCore.RIGHTS,
@@ -247,7 +247,9 @@ public class MetadataManager {
         for(Property property: DC_ELEMENTS){
             for(String value: metadata.getValues(property)){
                 
-                Element dcStatement = new Element(property.getName().substring(property.getName().indexOf(":")+1), DC_NAMESPACE);
+                Element dcStatement = new Element(property.getName()
+                        .substring(property.getName().indexOf(":")+1), //Ugly hack to rip off the prefix that doesn't belong here.
+                        DC_NAMESPACE);
                 dcStatement.addContent(value);
                 dcDescription.addContent(dcStatement);
             }
