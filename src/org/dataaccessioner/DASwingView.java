@@ -492,6 +492,7 @@ public class DASwingView extends javax.swing.JFrame {
         migrateBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                updateDCPane(null);
                 if(migrationSanityCheck()){
                     migration = new MigrationTask();
                     migration.execute();
