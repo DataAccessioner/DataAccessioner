@@ -12,14 +12,15 @@
     <import file="nbproject/build-impl.xml"/>
 
     <target name="-post-jar">
-        <jar update="true" destfile="${dist.jar}">
+        <!--<jar update="true" destfile="${dist.jar}">
             <zipgroupfileset dir="lib/" includes="*.jar" />
             <zipgroupfileset dir="lib/CopyLibs" includes="*.jar" />
             <zipgroupfileset dir="lib/droid" includes="*.jar" />
             <zipgroupfileset dir="lib/jhove" includes="*.jar" />
             <zipgroupfileset dir="lib/nzmetool" includes="*.jar" />
             <zipgroupfileset dir="lib/nzmetool/adapters" includes="*.jar" />
-        </jar>
+        </jar>-->
+        <copy todir="${dist.dir}/lib"><fileset dir="lib"/></copy>
         <copy todir="${dist.dir}/tools"><fileset dir="tools" /></copy>
         <copy todir="${dist.dir}/xml"><fileset dir="xml" /></copy>
         <copy file="license.txt" todir="${dist.dir}" />
