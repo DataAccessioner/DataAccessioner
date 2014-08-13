@@ -343,10 +343,7 @@ public class Migrator {
      * @return if the file should be skipped.
      */
     public boolean isExcluded(File file){
-        if(excludedItems.contains(file.getAbsolutePath())){
-            return true;
-        }
-        return false;
+        return excludedItems.contains(file.getAbsolutePath());
     }
     
     /**
