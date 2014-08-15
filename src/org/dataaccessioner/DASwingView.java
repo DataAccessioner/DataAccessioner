@@ -687,7 +687,7 @@ public class DASwingView extends javax.swing.JFrame {
         }
         if (srcIdTxt.getText().equals("")) {
             JOptionPane.showMessageDialog(this,
-                    "Disk Name cannot be empty",
+                    "Source Name/Identifier cannot be empty",
                     "Metadata Error",
                     JOptionPane.ERROR_MESSAGE);
             return false;
@@ -695,7 +695,7 @@ public class DASwingView extends javax.swing.JFrame {
 
         if (new File(accnNumDir, srcIdTxt.getText()).exists()) {
             JOptionPane.showMessageDialog(this,
-                    "Disk with the name " + srcIdTxt.getText()
+                    "A source with the name or identifier " + srcIdTxt.getText()
                     + " already exists.",
                     "Metadata Error",
                     JOptionPane.ERROR_MESSAGE);
@@ -709,8 +709,9 @@ public class DASwingView extends javax.swing.JFrame {
             if (srcIdTxt.getText().contains(badCharacter)) {
                 JOptionPane.showMessageDialog(this,
                         "You may not use any of the following characters"
-                        + " as the disk name:\n< > : \" / \\ | ? . ! * ½",
-                        "Illegal Characters in Disk Name",
+                        + " in the source name/identifier:\n"
+                        + "< > : \" / \\ | ? . ! * ½",
+                        "Illegal Characters in Source Name/Identifier",
                         JOptionPane.ERROR_MESSAGE);
                 return false;
             }
@@ -727,19 +728,19 @@ public class DASwingView extends javax.swing.JFrame {
             if (srcIdTxt.getText().equals(badName)) {
                 JOptionPane.showMessageDialog(this,
                         "You may not use any of the following names "
-                        + "as the disk name: \n"
+                        + "as the source name/identifier: \n"
                         + "com1, com2, com3, com4, com5, com6, com7, com8, com9, \n"
                         + "lpt1, lpt2, lpt3, lpt4, lpt5, lpt6, lpt7, lpt8, lpt9, \n"
                         + "con, nul, and prn.",
-                        "Illegal Characters in Disk Name",
+                        "Illegal Characters in Source Name/Identifier",
                         JOptionPane.ERROR_MESSAGE);
                 return false;
             }
         }
         if (!currentSrc.canRead()) {
             JOptionPane.showMessageDialog(this,
-                    "The disk/folder cannot be read, or has been removed or deleted.\n"
-                    + " Please re-insert disk or cancel migration.",
+                    "The source cannot be read, or has been removed or deleted.\n"
+                    + " Please re-attach the source (e.g. insert disk) or cancel migration.",
                     "Disk Missing",
                     JOptionPane.ERROR_MESSAGE);
         }
@@ -749,9 +750,9 @@ public class DASwingView extends javax.swing.JFrame {
 
     private void clearCancel(File destination) {
         int answer = JOptionPane.showOptionDialog(this,
-                "You canceled the migration before it completed.\n"
-                + "Would you like to delete the transfered files? ",
-                "Migration Canceled",
+                "You cancelled the migration before it completed.\n"
+                + "Would you like to delete the transferred files? ",
+                "Migration Cancelled",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.ERROR_MESSAGE,
                 null,
@@ -766,7 +767,7 @@ public class DASwingView extends javax.swing.JFrame {
                         JOptionPane.ERROR_MESSAGE);
             }
         }
-        setStatusMsg("Migration Canceled!");
+        setStatusMsg("Migration Cancelled!");
     }
 
     protected static boolean deleteRecursively(File toDelete) {
@@ -782,11 +783,11 @@ public class DASwingView extends javax.swing.JFrame {
 
     private void displayWarnings(){
         int answer = JOptionPane.showOptionDialog(this,
-                        "One or more errors occured during migration.\n" +
+                        "One or more errors occurred during migration.\n" +
                         "Details will be listed in the accession " +
                         "metadata file.\n" +
                         "Would you like to see a list of the errors now?",
-                        "Migration Errors Occured",
+                        "Migration Errors Occurred",
                         JOptionPane.YES_NO_OPTION,
                         JOptionPane.ERROR_MESSAGE,
                         null,
