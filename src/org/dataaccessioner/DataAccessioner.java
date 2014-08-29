@@ -34,6 +34,8 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.openide.util.Exceptions;
 
@@ -54,6 +56,8 @@ public class DataAccessioner {
     public DataAccessioner() {
         System.setProperty("log4j.configuration", Fits.FITS_TOOLS + "log4j.properties");
         logger = Logger.getLogger(this.getClass());
+        BasicConfigurator.configure();
+        logger.setLevel(Level.INFO);
 
         //May eventually setup some other configuration stuff here.
         //FITS is not initialized here because it takes some time to start

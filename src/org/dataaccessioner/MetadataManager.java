@@ -30,6 +30,9 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.apache.tika.metadata.DublinCore;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.Property;
@@ -42,6 +45,7 @@ import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 import org.jdom.transform.XSLTransformException;
 import org.jdom.transform.XSLTransformer;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -51,6 +55,8 @@ public class MetadataManager {
 
     public final static int STATUS_FAILURE = -20;
     public final static int STATUS_SUCCESS = 30;
+    
+    private static Logger logger;
     
     private static File xmlFile;
     private static Document document;
@@ -90,17 +96,23 @@ public class MetadataManager {
     public static String getName() {
         return "Full Metadata";
     }
+    private XSLTransformer transformer;
 
     public MetadataManager(File metadataFile, String collectionName, String accessionNumber) {
         this.metadataFile = metadataFile;
         this.collectionName = collectionName;
         this.accessionNumber = accessionNumber;
+        
+        logger = Logger.getLogger(this.getClass());
+        logger.setLevel(Level.INFO);
+        BasicConfigurator.configure();
+        try {
+            transformer = new XSLTransformer("xml/metadataManager.xsl");
+        } catch (XSLTransformException ex) {
+            logger.warn("Unable to setup FITS XSLT. Metadata will include full FITS xml.");
+        }
     }
     
-    public MetadataManager() {
-        
-    }
- 
     public void open() throws Exception {
         xmlFile = metadataFile;
         xmlFile.getParentFile().mkdirs(); //In case it doesn't exist
@@ -216,12 +228,14 @@ public class MetadataManager {
 
     public boolean addDocumentXSLT(Document document){
         try {
-            XSLTransformer transformer = new XSLTransformer("xml/metadataManager.xsl");
-            Document premis = transformer.transform(document);
-            addElement(premis.detachRootElement());
-        } catch (XSLTransformException ex) {
-            System.err.println("Failed to transform document xml using xml/metadataManager.xsl");
-            addElement(document.detachRootElement());
+            if (transformer != null) {
+                Document premis = transformer.transform(document);
+                addElement(premis.detachRootElement());
+            } else {
+                addElement(document.detachRootElement());
+            }
+        } catch (org.jdom.JDOMException je) {
+            logger.error("Failed to transform or add FITS XML to metadata.");
             return false;
         }
         return true;

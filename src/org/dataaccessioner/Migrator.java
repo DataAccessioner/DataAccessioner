@@ -296,7 +296,7 @@ public class Migrator {
         }
         if (toProcess != null && fits != null) {
             try {
-                statusMessage = "Running FITS on " + toProcess.getPath();
+                statusMessage = "Running FITS on " + toProcess.getName();
 
                 FitsOutput fout = fits.examine(toProcess);
                 System.out.println(statusMessage);

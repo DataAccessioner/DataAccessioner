@@ -21,7 +21,6 @@
           <xsl:value-of select="/fits:fits/fits:fileinfo/fits:size"/>
         </premis:size>
         <xsl:for-each select="/fits:fits/fits:identification/fits:identity">
-          <!--TODO-->
           <premis:format>
             <premis:formatDesignation>
               <premis:formatName>
@@ -33,7 +32,6 @@
                 </premis:formatVersion>
               </xsl:if>
             </premis:formatDesignation>
-            <!--TODO: Add format registry -->
             <xsl:if test="fits:externalIdentifier/@toolname='Droid'">
               <premis:formatRegistry>
                 <premis:formatRegistryName>http://www.nationalarchives.gov.uk/pronom</premis:formatRegistryName>
