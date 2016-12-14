@@ -46,6 +46,7 @@
     <start-class>org.dataaccessioner.DataAccessioner</start-class>
 
     <!-- core dependency versions -->
+    <tika.version>1.14</tika.version>
 
     <!-- FITS dependency versions -->
     <!-- Note:  FITS dependencies managed by maven must match the
@@ -78,14 +79,19 @@
 
     <!-- plugin dependency versions -->
     <maven-compiler-plugin.version>3.6.0</maven-compiler-plugin.version>
-    <maven-assembly-plugin.version>2.5.5</maven-assembly-plugin.version>
-
+    <maven-assembly-plugin.version>2.5.1</maven-assembly-plugin.version>
+    <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
   </properties>
 
 
   <dependencies>
 
     <!-- core dependencies -->
+    <dependency>
+      <groupId>org.apache.tika</groupId>
+      <artifactId>tika-app</artifactId>
+      <version>${tika.version}</version>
+    </dependency>
 
     <!-- FITS dependencies -->
     <dependency>
@@ -322,6 +328,7 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <groupId>org.apache.maven.plugins</groupId>
+        <version>${maven-surefire-plugin.version}</version>
       </plugin>
     </plugins>
   </build>
