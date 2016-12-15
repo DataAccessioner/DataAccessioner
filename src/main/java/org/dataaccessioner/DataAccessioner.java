@@ -20,24 +20,17 @@ package org.dataaccessioner;
 
 import edu.harvard.hul.ois.fits.Fits;
 import edu.harvard.hul.ois.fits.exceptions.FitsException;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.GnuParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionGroup;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.*;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.openide.util.Exceptions;
+
+import javax.swing.*;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -54,7 +47,7 @@ public class DataAccessioner {
     private Migrator migrator = new Migrator();
 
     public DataAccessioner() {
-        System.setProperty("log4j.configuration", Fits.FITS_TOOLS + "log4j.properties");
+        System.setProperty("log4j.configuration", Fits.FITS_TOOLS_DIR + "log4j.properties");
         logger = Logger.getLogger(this.getClass());
         BasicConfigurator.configure();
         logger.setLevel(Level.INFO);
@@ -86,7 +79,7 @@ public class DataAccessioner {
         fitsOptions.addOption(new Option("x", false, "Don't run FITS; only copy"));
         options.addOptionGroup(fitsOptions);
 
-        CommandLineParser parser = new GnuParser();
+        CommandLineParser parser = new DefaultParser();
         CommandLine cmd = parser.parse(options, args);
 
         if (cmd.hasOption("h")) {

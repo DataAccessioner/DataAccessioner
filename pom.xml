@@ -46,6 +46,8 @@
     <start-class>org.dataaccessioner.DataAccessioner</start-class>
 
     <!-- core dependency versions -->
+    <beansbinding.version>1.2.1</beansbinding.version>
+    <netbeans.version>RELEASE82</netbeans.version>
     <tika.version>1.14</tika.version>
 
     <!-- FITS dependency versions -->
@@ -61,7 +63,7 @@
     <commons-lang.version>2.6</commons-lang.version>
     <commons-logging.version>1.2</commons-logging.version>
     <jaxen.version>1.0-FCS</jaxen.version>
-    <jdom.version>2.0.2</jdom.version>
+    <jdom.version>1.1.3</jdom.version>
     <jna.version>4.1.0</jna.version>
     <log4j.version>1.2.17</log4j.version>
     <ots.version>1.0.39</ots.version> <!-- dataaccessioner.org -->
@@ -74,6 +76,9 @@
     <!-- DROID tool version -->
     <droid.version>6.2.1</droid.version>
 
+    <!-- Jhove tool version -->
+    <jhove.version>1.14.7</jhove.version>
+
     <!-- test dependency versions -->
     <testng.version>6.10</testng.version>
 
@@ -81,12 +86,28 @@
     <maven-compiler-plugin.version>3.6.0</maven-compiler-plugin.version>
     <maven-assembly-plugin.version>2.5.1</maven-assembly-plugin.version>
     <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
+    <maven-jar-plugin.version>3.0.2</maven-jar-plugin.version>
   </properties>
 
 
   <dependencies>
 
     <!-- core dependencies -->
+    <dependency>
+      <groupId>org.jdesktop</groupId>
+      <artifactId>beansbinding</artifactId>
+      <version>${beansbinding.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-netbeans-swing-outline</artifactId>
+      <version>${netbeans.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-openide-util</artifactId>
+      <version>${netbeans.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.apache.tika</groupId>
       <artifactId>tika-app</artifactId>
@@ -282,6 +303,24 @@
       <version>${droid.version}</version>
     </dependency>
 
+    <!-- Jhove dependencies -->
+    <dependency>
+      <groupId>org.openpreservation.jhove</groupId>
+      <artifactId>jhove-core</artifactId>
+      <version>${jhove.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openpreservation.jhove</groupId>
+      <artifactId>jhove-apps</artifactId>
+      <version>${jhove.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openpreservation.jhove</groupId>
+      <artifactId>jhove-modules</artifactId>
+      <version>${jhove.version}</version>
+    </dependency>
+
+
     <!-- Test dependencies -->
     <dependency>
       <groupId>org.testng</groupId>
@@ -296,6 +335,22 @@
       <id>dataaccessioner.org</id>
       <name>Data Accessioner Maven Repository</name>
       <url>http://saez.library.wisc.edu/maven2</url>
+    </repository>
+    <repository>
+      <id>netbeans</id>
+      <name>NetBeans</name>
+      <url>http://bits.netbeans.org/maven2/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>opf-dev-mvn</id>
+      <name>opf-dev</name>
+      <url>http://artifactory.opf-labs.org/artifactory/opf-dev</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
     </repository>
   </repositories>
 
@@ -330,6 +385,17 @@
         <groupId>org.apache.maven.plugins</groupId>
         <version>${maven-surefire-plugin.version}</version>
       </plugin>
+      <!-- <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>${maven-jar-plugin.version}</version>
+        <configuration>
+        <archive>
+          <manifest>
+            <mainClass>org.dataaccessioner.DataAccessioner</mainClass>
+          </manifest>
+        </archive>
+      </configuration>
+      </plugin> -->
     </plugins>
   </build>
 
