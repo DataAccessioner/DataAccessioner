@@ -19,61 +19,26 @@
 
 package org.dataaccessioner;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import javax.swing.GroupLayout;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
-import javax.swing.JSplitPane;
-import javax.swing.JTable;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.JToolBar;
-import javax.swing.LayoutStyle;
-import javax.swing.ListSelectionModel;
-import javax.swing.SwingConstants;
-import javax.swing.SwingWorker;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.Property;
+import org.netbeans.swing.outline.*;
+
+import javax.swing.*;
 import javax.swing.Timer;
-import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.SoftBevelBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.tree.TreeModel;
-import org.apache.tika.metadata.Metadata;
-import org.apache.tika.metadata.Property;
-import org.netbeans.swing.outline.DefaultOutlineModel;
-import org.netbeans.swing.outline.Outline;
-import org.netbeans.swing.outline.OutlineModel;
-import org.netbeans.swing.outline.RenderDataProvider;
-import org.netbeans.swing.outline.RowModel;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.io.File;
+import java.util.*;
+import java.util.List;
 
 /**
  *
@@ -419,12 +384,12 @@ public class DASwingView extends javax.swing.JFrame {
         //Item/Dublin Core Pane & Layout
         
         //File Tree Icons
-        UIManager.put("exclude.icon", new ImageIcon(getClass().getResource("resources/exclude.gif")));
-        UIManager.put("exclude_hidden.icon", new ImageIcon(getClass().getResource("resources/exclude_hidden.gif")));
-        UIManager.put("folder.icon", new ImageIcon(getClass().getResource("resources/folder.gif")));
-        UIManager.put("folder_hidden.icon", new ImageIcon(getClass().getResource("resources/folder_hidden.gif")));
-        UIManager.put("file.icon", new ImageIcon(getClass().getResource("resources/file.gif")));
-        UIManager.put("file_hidden.icon", new ImageIcon(getClass().getResource("resources/file_hidden.gif")));
+        UIManager.put("exclude.icon", new ImageIcon(getClass().getResource("/exclude.gif")));
+        UIManager.put("exclude_hidden.icon", new ImageIcon(getClass().getResource("/exclude_hidden.gif")));
+        UIManager.put("folder.icon", new ImageIcon(getClass().getResource("/folder.gif")));
+        UIManager.put("folder_hidden.icon", new ImageIcon(getClass().getResource("/folder_hidden.gif")));
+        UIManager.put("file.icon", new ImageIcon(getClass().getResource("/file.gif")));
+        UIManager.put("file_hidden.icon", new ImageIcon(getClass().getResource("/file_hidden.gif")));
         
         for(Property prop: MetadataManager.DC_ELEMENTS){
             dcElementsCB.addItem(prop.getName());
