@@ -80,6 +80,11 @@
     <!-- Jhove tool version -->
     <jhove.version>1.14.7</jhove.version>
 
+    <!-- NLNZ Metadata Extractor tool version -->
+    <nlnzme.version>3.6GA</nlnzme.version>
+    <pdfbox.version>0.7.3</pdfbox.version>
+    <poi.version>20040804</poi.version>
+
     <!-- test dependency versions -->
     <testng.version>6.10</testng.version>
 
@@ -326,6 +331,27 @@
       <version>${jhove.version}</version>
     </dependency>
 
+    <!-- NLNZ Metadata Extractor dependencies -->
+    <dependency>
+      <groupId>org.dataaccessioner</groupId>
+      <artifactId>bfj220</artifactId>
+      <version>${nlnzme.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dataaccessioner</groupId>
+      <artifactId>metadata</artifactId>
+      <version>${nlnzme.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>pdfbox</groupId>
+      <artifactId>pdfbox</artifactId>
+      <version>${pdfbox.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>poi</groupId>
+      <artifactId>poi-2.5.1-final</artifactId>
+      <version>${poi.version}</version>
+    </dependency>
 
     <!-- Test dependencies -->
     <dependency>
