@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Seth Shaw.
+ * Copyright (C) 2016 Seth Shaw.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -39,7 +39,7 @@ import java.util.Set;
 public class DataAccessioner {
 
     private static final String NAME = "DataAccessioner";
-    private static final String VERSION = "1.0";
+    private static final String VERSION = "1.1";
     private static Logger logger;
 
     private Fits fits;
