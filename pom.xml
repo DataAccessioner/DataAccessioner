@@ -88,7 +88,6 @@
     <maven-assembly-plugin.version>2.5.1</maven-assembly-plugin.version>
     <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
     <maven-shade-plugin.version>2.4.3</maven-shade-plugin.version>
-    <maven-dependency-plugin.version>2.10</maven-dependency-plugin.version>
   </properties>
 
 
@@ -410,25 +409,16 @@
                   <mainClass>org.dataaccessioner.DataAccessioner</mainClass>
                 </transformer>
               </transformers>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>${maven-dependency-plugin.version}</version>
-        <executions>
-          <execution>
-            <id>unpack-dependencies</id>
-            <phase>package</phase>
-            <goals>
-              <goal>unpack-dependencies</goal>
-            </goals>
-            <configuration>
-              <excludes>META-INF/*.SF,META-INF/*.DSA,META-INF/*.RSA</excludes>
-              <includeGroupIds>org.bouncycastle,com.lowagie</includeGroupIds>
-              <outputDirectory>${project.build.directory}/classes</outputDirectory>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                  </excludes>
+                </filter>
+              </filters>
             </configuration>
           </execution>
         </executions>
