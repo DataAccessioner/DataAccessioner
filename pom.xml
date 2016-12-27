@@ -84,6 +84,7 @@
     <nlnzme.version>3.6GA</nlnzme.version>
     <pdfbox.version>0.7.3</pdfbox.version>
     <poi.version>20040804</poi.version>
+    <aspose-words.version>15.7.0</aspose-words.version>
 
     <!-- test dependency versions -->
     <testng.version>6.10</testng.version>
@@ -335,6 +336,11 @@
     <!-- NLNZ Metadata Extractor dependencies -->
     <dependency>
       <groupId>org.dataaccessioner</groupId>
+      <artifactId>aspose-words</artifactId>
+      <version>${aspose-words.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dataaccessioner</groupId>
       <artifactId>bfj220</artifactId>
       <version>${nlnzme.version}</version>
     </dependency>
@@ -498,7 +504,7 @@
         <configuration>
           <archive>
             <manifestEntries>
-              <Class-Path>tools/ xml/</Class-Path>
+              <Class-Path>tools/ xml/ xml/nlnz</Class-Path>
             </manifestEntries>
           </archive>
         </configuration>
