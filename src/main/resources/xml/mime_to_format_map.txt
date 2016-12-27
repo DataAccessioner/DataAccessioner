@@ -1,0 +1,12 @@
+#Currently used by Tika and DROID tool wrappers    
+#Mapping from MIME types to standard names. This is an incomplete map,
+#holding only cases where conversion is necessary. Expand as needed.
+image/jpx=JPEG 2000 JPX
+image/jp2=JPEG 2000 JP2
+application/zip=ZIP Format
+application/epub+zip=EPUB
+application/vnd.openxmlformats-officedocument.wordprocessingml.document=Office Open XML Document
+application/rtf=Rich Text Format (RTF)
+text/rtf=Rich Text Format (RTF)
+application/vnd.wordperfect=WordPerfect Document
+application/msword=Microsoft Word Binary File Format
