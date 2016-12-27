@@ -6,7 +6,7 @@ file server for basic preservation, further appraisal, arrangement,
 and description.
 
 It provides a a wrapper around the FITS toolkit 
-<http://projects.iq.harvard.edu/fits/home> to integrate common 
+(<http://projects.iq.harvard.edu/fits/home>) to integrate common 
 metadata tools to analyze and describe found content at the time 
 of migration.
 
@@ -32,7 +32,7 @@ subdirectory, with the name `dataaccessioner-<version>-dist.zip`.
 For testing purposes, you may run the created jar in the `target/`
 folder directly, first setting the FITS_HOME environment variable:
 
-   FITS_HOME=src/main/resources java -jar target/dataaccessioner-1.1.jar
+    FITS_HOME=src/main/resources java -jar target/dataaccessioner-1.1.jar
 
 ## Install
 
@@ -60,7 +60,7 @@ revised architecture, and the metadata tool adapters and the
 custom metadata manager were extracted to be used as plugins.
 
 Versions 0.3.1 and 1.0 were made possible by the POWRR Project
-<http://digitalpowrr.niu.edu/>;  at that point, the tool became
+(<http://digitalpowrr.niu.edu/>);  at that point, the tool became
 an open source application, unaffiliated to any institution.  
 Version 1.0 is the first version to use FITS as a metadata tool 
 wrapper.
@@ -72,6 +72,7 @@ dependencies, and contains several minor enhancements.
 ## Credits
 
 [Seth Shaw](https://github.com/seth-shaw)
+
 [Scott Prater](https://github.com/sprater)
 
 ## License
