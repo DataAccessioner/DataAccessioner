@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd">
+  <id>dist</id>
+  <formats>
+    <format>zip</format>
+  </formats>
+  <baseDirectory>dataaccessioner-${version}</baseDirectory>
+  <fileSets>
+    <fileSet>
+      <directory>src/bin</directory>
+      <outputDirectory>/</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>src/main/resources/tools</directory>
+      <outputDirectory>/tools</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>src/main/resources/xml</directory>
+      <outputDirectory>/xml</outputDirectory>
+    </fileSet>
+  </fileSets>
+  <files>
+    <file>
+      <source>target/${artifactId}-${version}.${packaging}</source>
+      <outputDirectory>dataaccessioner-${version}</outputDirectory>
+      <destName>${artifactId}.${packaging}</destName>
+    </file>
+    <file>
+      <source>src/main/resources/README.md</source>
+      <outputDirectory>dataaccessioner-${version}</outputDirectory>
+    </file>
+    <file>
+      <source>src/main/resources/license.txt</source>
+      <outputDirectory>dataaccessioner-${version}</outputDirectory>
+    </file>
+  </files>
+</assembly>
