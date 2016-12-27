@@ -353,6 +353,88 @@
       <version>${poi.version}</version>
     </dependency>
 
+    <!-- NLNZ Metadata Extractor Adapters -->
+    <dependency>
+      <groupId>org.dataaccessioner.nlnzme.adapters</groupId>
+      <artifactId>bmp_adapter</artifactId>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dataaccessioner.nlnzme.adapters</groupId>
+      <artifactId>excel_adapter</artifactId>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dataaccessioner.nlnzme.adapters</groupId>
+      <artifactId>gif_adapter</artifactId>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dataaccessioner.nlnzme.adapters</groupId>
+      <artifactId>html_adapter</artifactId>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dataaccessioner.nlnzme.adapters</groupId>
+      <artifactId>jpg_adapter</artifactId>
+      <version>1.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dataaccessioner.nlnzme.adapters</groupId>
+      <artifactId>mp3_adapter</artifactId>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dataaccessioner.nlnzme.adapters</groupId>
+      <artifactId>msword_adapter</artifactId>
+      <version>2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dataaccessioner.nlnzme.adapters</groupId>
+      <artifactId>msworks_adapter</artifactId>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dataaccessioner.nlnzme.adapters</groupId>
+      <artifactId>openoffice_adapter</artifactId>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dataaccessioner.nlnzme.adapters</groupId>
+      <artifactId>pdf_adapter</artifactId>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dataaccessioner.nlnzme.adapters</groupId>
+      <artifactId>pdfbox_adapter</artifactId>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dataaccessioner.nlnzme.adapters</groupId>
+      <artifactId>powerpoint_adapter</artifactId>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dataaccessioner.nlnzme.adapters</groupId>
+      <artifactId>tiff_adapter</artifactId>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dataaccessioner.nlnzme.adapters</groupId>
+      <artifactId>wave_adapter</artifactId>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dataaccessioner.nlnzme.adapters</groupId>
+      <artifactId>wordperfect_adapter</artifactId>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dataaccessioner.nlnzme.adapters</groupId>
+      <artifactId>xml_adapter</artifactId>
+      <version>1.0</version>
+    </dependency>
+
     <!-- Test dependencies -->
     <dependency>
       <groupId>org.testng</groupId>
