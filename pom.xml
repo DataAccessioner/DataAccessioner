@@ -76,7 +76,7 @@
     <xerces.version>2.9.1</xerces.version>
 
     <!-- DROID tool version -->
-    <droid.version>6.2.1</droid.version>
+    <droid.version>6.1.5</droid.version>
 
     <!-- Jhove tool version -->
     <jhove.version>1.14.7</jhove.version>
