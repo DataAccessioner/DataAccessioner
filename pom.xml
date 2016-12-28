@@ -55,7 +55,8 @@
          the versions distributed in the version of FITS package
          included here -->
     <fits.version>1.0.4</fits.version> <!-- dataaccessioner.org -->
-    <bcmail.version>1.38</bcmail.version>
+    <bcmail.version>1.46</bcmail.version>
+    <bcprov.version>1.46</bcprov.version>
     <commons-cli.version>1.1</commons-cli.version>
     <commons-collections.version>3.2.1</commons-collections.version>
     <commons-configuration.version>1.8</commons-configuration.version>
@@ -82,9 +83,22 @@
 
     <!-- NLNZ Metadata Extractor tool version -->
     <nlnzme.version>3.6GA</nlnzme.version>
-    <pdfbox.version>0.7.3</pdfbox.version>
-    <poi.version>20040804</poi.version>
     <aspose-words.version>15.7.0</aspose-words.version>
+    <commons-httpclient.version>3.1</commons-httpclient.version>
+    <fastutil-heritrix-subset.version>1.0</fastutil-heritrix-subset.version>
+    <heritrix.version>1.14.1</heritrix.version>
+    <isoparser.version>1.1.17</isoparser.version>
+    <jflac.version>1.3</jflac.version>
+    <jid3lib.version>0.5.4</jid3lib.version>
+    <jmimemagic.version>0.1.4</jmimemagic.version>
+    <jwat.version>1.0.0</jwat.version>
+    <oro.version>2.0.8</oro.version>
+    <pdfbox.version>0.7.3</pdfbox.version>
+    <poi-old.version>3.0-FINAL</poi-old.version>
+    <poi.version>3.12</poi.version>
+    <xalan.version>2.7.2</xalan.version>
+    <xml-apis.version>2.0.2</xml-apis.version>
+
 
     <!-- test dependency versions -->
     <testng.version>6.10</testng.version>
@@ -135,8 +149,13 @@
     </dependency>
     <dependency>
       <groupId>org.bouncycastle</groupId>
-      <artifactId>bcmail-jdk14</artifactId>
+      <artifactId>bcmail-jdk16</artifactId>
       <version>${bcmail.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk16</artifactId>
+      <version>${bcprov.version}</version>
     </dependency>
     <dependency>
       <groupId>commons-cli</groupId>
@@ -345,9 +364,74 @@
       <version>${nlnzme.version}</version>
     </dependency>
     <dependency>
+      <groupId>commons-httpclient</groupId>
+      <artifactId>commons-httpclient</artifactId>
+      <version>${commons-httpclient.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dataaccessioner</groupId>
+      <artifactId>fastutil-5.0.3-heritrix-subset</artifactId>
+      <version>${fastutil-heritrix-subset.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.dataaccessioner</groupId>
       <artifactId>metadata</artifactId>
       <version>${nlnzme.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dataaccessioner</groupId>
+      <artifactId>heritrix</artifactId>
+      <version>${heritrix.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.googlecode.mp4parser</groupId>
+      <artifactId>isoparser</artifactId>
+      <version>${isoparser.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dataaccessioner</groupId>
+      <artifactId>jflac</artifactId>
+      <version>${jflac.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dataaccessioner</groupId>
+      <artifactId>jflac-jdk14</artifactId>
+      <version>${jflac.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sf.javamusictag</groupId>
+      <artifactId>jid3lib</artifactId>
+      <version>${jid3lib.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sf.jmimemagic</groupId>
+      <artifactId>jmimemagic</artifactId>
+      <version>${jmimemagic.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jwat</groupId>
+      <artifactId>jwat-arc</artifactId>
+      <version>${jwat.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jwat</groupId>
+      <artifactId>jwat-common</artifactId>
+      <version>${jwat.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jwat</groupId>
+      <artifactId>jwat-gzip</artifactId>
+      <version>${jwat.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jwat</groupId>
+      <artifactId>jwat-warc</artifactId>
+      <version>${jwat.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>oro</groupId>
+      <artifactId>oro</artifactId>
+      <version>${oro.version}</version>
     </dependency>
     <dependency>
       <groupId>pdfbox</groupId>
@@ -356,11 +440,36 @@
     </dependency>
     <dependency>
       <groupId>poi</groupId>
-      <artifactId>poi-2.5.1-final</artifactId>
+      <artifactId>poi</artifactId>
+      <version>${poi-old.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi</artifactId>
       <version>${poi.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi-ooxml</artifactId>
+      <version>${poi.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>xalan</groupId>
+      <artifactId>xalan</artifactId>
+      <version>${xalan.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>xml-apis</groupId>
+      <artifactId>xml-apis</artifactId>
+      <version>${xml-apis.version}</version>
     </dependency>
 
     <!-- NLNZ Metadata Extractor Adapters -->
+    <dependency>
+      <groupId>org.dataaccessioner.nlnzme.adapters</groupId>
+      <artifactId>arc_adapter</artifactId>
+      <version>1.0</version>
+    </dependency>
     <dependency>
       <groupId>org.dataaccessioner.nlnzme.adapters</groupId>
       <artifactId>bmp_adapter</artifactId>
@@ -370,6 +479,11 @@
       <groupId>org.dataaccessioner.nlnzme.adapters</groupId>
       <artifactId>excel_adapter</artifactId>
       <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dataaccessioner.nlnzme.adapters</groupId>
+      <artifactId>flac_adapter</artifactId>
+      <version>1.1</version>
     </dependency>
     <dependency>
       <groupId>org.dataaccessioner.nlnzme.adapters</groupId>
@@ -383,12 +497,22 @@
     </dependency>
     <dependency>
       <groupId>org.dataaccessioner.nlnzme.adapters</groupId>
+      <artifactId>jID3LibMp3_adapter</artifactId>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dataaccessioner.nlnzme.adapters</groupId>
       <artifactId>jpg_adapter</artifactId>
       <version>1.1</version>
     </dependency>
     <dependency>
       <groupId>org.dataaccessioner.nlnzme.adapters</groupId>
       <artifactId>mp3_adapter</artifactId>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dataaccessioner.nlnzme.adapters</groupId>
+      <artifactId>mpeg4_adapter</artifactId>
       <version>1.0</version>
     </dependency>
     <dependency>
@@ -428,6 +552,11 @@
     </dependency>
     <dependency>
       <groupId>org.dataaccessioner.nlnzme.adapters</groupId>
+      <artifactId>warc_adapter</artifactId>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dataaccessioner.nlnzme.adapters</groupId>
       <artifactId>wave_adapter</artifactId>
       <version>1.0</version>
     </dependency>
@@ -441,6 +570,7 @@
       <artifactId>xml_adapter</artifactId>
       <version>1.0</version>
     </dependency>
+
 
     <!-- Test dependencies -->
     <dependency>
