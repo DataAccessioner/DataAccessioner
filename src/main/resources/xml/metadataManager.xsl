@@ -2,10 +2,10 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:fits="http://hul.harvard.edu/ois/xml/ns/fits/fits_output" xmlns:uuid="java:java.util.UUID" version="2.0">
   <xsl:template match="/">
     <premis:object xmlns:premis="info:lc/xmlns/premis-v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="premis:file">
-      <premis:objetIdentifier>
+      <premis:objectIdentifier>
         <premis:objectIdentifierType>uuid</premis:objectIdentifierType>
         <premis:objectIdentifierValue><xsl:value-of select="uuid:randomUUID()"/></premis:objectIdentifierValue>
-      </premis:objetIdentifier>
+      </premis:objectIdentifier>
       <premis:objectCharacteristics>
         <premis:compositionLevel>0</premis:compositionLevel>
         <premis:fixity>
@@ -38,6 +38,7 @@
                 <premis:formatRegistryKey><xsl:value-of select="fits:externalIdentifier" /></premis:formatRegistryKey>
               </premis:formatRegistry>
             </xsl:if>
+              <premis:formatNote><xsl:value-of select="@mimetype" /></premis:formatNote>
             <xsl:for-each select="fits:tool">
               <premis:formatNote>Identified by: <xsl:value-of select="@toolname"/><xsl:text> v</xsl:text><xsl:value-of select="@toolversion"/></premis:formatNote>
             </xsl:for-each>
