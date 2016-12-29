@@ -2,33 +2,28 @@
 <!-- You may freely edit this file. See commented blocks below for -->
 <!-- some examples of how to customize the build. -->
 <!-- (If you delete it and reopen the project it will be recreated.) -->
-<project name="DataAccessioner_plugin" default="default" basedir=".">
-    <description>Builds, tests, and runs the project DataAccessioner_plugin.</description>
+<!-- By default, only the Clean and Build commands use this build script. -->
+<!-- Commands such as Run, Debug, and Test only use this build script if -->
+<!-- the Compile on Save feature is turned off for the project. -->
+<!-- You can turn off the Compile on Save (or Deploy on Save) setting -->
+<!-- in the project's Project Properties dialog box.-->
+<project name="DataAccessioner" default="default" basedir=".">
+    <description>Builds, tests, and runs the project DataAccessioner v1.0.</description>
     <import file="nbproject/build-impl.xml"/>
+
     <target name="-post-jar">
-        <jar update="true" destfile="${dist.jar}">
-            <zipfileset src="lib/appframework-1.0.3.jar"/>
-            <zipfileset src="lib/commons-cli-1.2.jar" />
-            <zipfileset src="lib/commons-logging.jar" />
-            <zipfileset src="lib/commons-configuration-1.6.jar" />
-            <zipfileset src="lib/commons-lang-2.4.jar" />
-            <zipfileset src="lib/commons-collections-3.2.1.jar" />
-            <zipfileset src="lib/jaxen-core.jar" />
-            <zipfileset src="lib/jaxen-jdom.jar" />
-            <zipfileset src="lib/jdom.jar" />
-            <zipfileset src="lib/jxp.jar" />
-            <zipfileset src="lib/jpf.jar" />
-            <zipfileset src="lib/saxpath.jar" />
-            <zipfileset src="lib/swing-layout-1.0.3.jar" />
-            <zipfileset src="lib/swing-worker-1.1.jar" />
-            <fileset file="splash.gif" />
-        </jar>
-        <copy todir="${dist.dir}" >
-            <fileset file="start.bat" />
-            <fileset file="license.txt" />
-        </copy>
-        <copy todir="${dist.dir}/plugins">
-            <fileset dir="plugins" />
-        </copy>
+        <!--<jar update="true" destfile="${dist.jar}">
+            <zipgroupfileset dir="lib/" includes="*.jar" />
+            <zipgroupfileset dir="lib/CopyLibs" includes="*.jar" />
+            <zipgroupfileset dir="lib/droid" includes="*.jar" />
+            <zipgroupfileset dir="lib/jhove" includes="*.jar" />
+            <zipgroupfileset dir="lib/nzmetool" includes="*.jar" />
+            <zipgroupfileset dir="lib/nzmetool/adapters" includes="*.jar" />
+        </jar>-->
+        <copy todir="${dist.dir}/lib"><fileset dir="lib"/></copy>
+        <copy todir="${dist.dir}/tools"><fileset dir="tools" /></copy>
+        <copy todir="${dist.dir}/xml"><fileset dir="xml" /></copy>
+        <copy file="license.txt" todir="${dist.dir}" />
+        <copy file="README.txt" todir="${dist.dir}" />
     </target>
 </project>

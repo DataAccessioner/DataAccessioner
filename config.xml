@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="ISO-8859-1" ?>
-<config>
-<DefaultMetadataManager>
-    <writepath>${DefaultMetadataManager.destination}${file.separator}..${file.separator}..${file.separator}metadata${file.separator}${DefaultMetadataManager.accession.number}.xml</writepath>
-    <checksums>MD5,SHA-256</checksums>
-</DefaultMetadataManager>
-</config>
