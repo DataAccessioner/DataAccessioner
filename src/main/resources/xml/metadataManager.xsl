@@ -37,6 +37,7 @@
                 <premis:formatRegistryName>http://www.nationalarchives.gov.uk/pronom</premis:formatRegistryName>
                 <premis:formatRegistryKey><xsl:value-of select="fits:externalIdentifier" /></premis:formatRegistryKey>
               </premis:formatRegistry>
+              <premis:formatNote>DROID Signature File Version: <xsl:value-of select="../../fits:toolOutput/fits:tool[@name='Droid']/results/result[1]/signatureFileVersion" /></premis:formatNote>
             </xsl:if>
               <premis:formatNote><xsl:value-of select="@mimetype" /></premis:formatNote>
             <xsl:for-each select="fits:tool">

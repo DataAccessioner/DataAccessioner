@@ -51,6 +51,7 @@ public class DADroidToolOutputter {
         Document toolDoc = new Document (fitsElem);
         Element idElem = new Element ("identification", fitsNS);
         fitsElem.addContent(idElem);
+        String sigFileVersion = DADroid.getSigFileVersion();
         for (IdentificationResult res : resList) {
             String filePuid = res.getPuid();
             String formatName = res.getName();
@@ -100,9 +101,11 @@ public class DADroidToolOutputter {
                 attr = new Attribute ("type", "puid");
                 puidElem.setAttribute (attr);
             }
+
+
         }
 
-        return toolDoc;     // TODO stub
+        return toolDoc;
     }
 
     private String mapFormatName(String formatName) {
@@ -157,7 +160,6 @@ public class DADroidToolOutputter {
      * particular requirements beyond dumping as much data as might be useful?
      *
      * @throws FitsToolException
-     * @throws SAXException
      */
     private Document buildRawData (List<IdentificationResult> resList) throws FitsToolException {
 
@@ -172,6 +174,7 @@ public class DADroidToolOutputter {
             String formatName = res.getName();
             String mimeType = res.getMimeType();
             String version = res.getVersion();
+            String sigVersion = DADroid.getSigFileVersion();
             out.write("<result>");
             out.write("\n");
             out.write("<filePuid>" + filePuid + "</filePuid>");
@@ -181,7 +184,11 @@ public class DADroidToolOutputter {
             out.write("<mimeType>" + mimeType + "</mimeType>");
             out.write("\n");
             out.write("<version>" + version + "</version>");
+            out.write("\n");
+            out.write("<signatureFileVersion>" + sigVersion + "</signatureFileVersion>");
+            out.write("\n");
             out.write("</result>");
+            out.write("\n");
         }
 
         out.write("  </results>");
