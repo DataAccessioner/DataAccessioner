@@ -5,7 +5,6 @@ import edu.harvard.hul.ois.fits.exceptions.FitsToolException;
 import edu.harvard.hul.ois.fits.tools.ToolBase;
 import edu.harvard.hul.ois.fits.tools.ToolInfo;
 import edu.harvard.hul.ois.fits.tools.ToolOutput;
-import edu.harvard.hul.ois.fits.tools.droid.DroidQuery;
 import org.apache.log4j.Logger;
 import org.jdom.input.SAXBuilder;
 import org.w3c.dom.Document;
@@ -16,6 +15,7 @@ import uk.gov.nationalarchives.droid.core.BinarySignatureIdentifier;
 import uk.gov.nationalarchives.droid.core.SignatureFileParser;
 import uk.gov.nationalarchives.droid.core.SignatureParseException;
 import uk.gov.nationalarchives.droid.core.interfaces.IdentificationResultCollection;
+import uk.gov.nationalarchives.droid.submitter.SubmissionGateway;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -32,7 +32,7 @@ import java.io.*;
 public class DADroid extends ToolBase {
 
     private boolean enabled = true;
-    private DroidQuery droidQuery;
+    private DADroidQuery droidQuery;
     private static final Logger logger = Logger.getLogger(edu.harvard.hul.ois.fits.tools.droid.Droid.class);
     private static String sigFileVersion;
     private static BinarySignatureIdentifier sigIdentifier = new BinarySignatureIdentifier();
@@ -47,7 +47,7 @@ public class DADroid extends ToolBase {
             File sigFile = new File(droid_conf + Fits.config.getString("droid_sigfile"));
             try {
                 logger.debug("Droid Signature File path: '" + sigFile.getAbsolutePath() + "'");
-                droidQuery = new DroidQuery(sigFile);
+                droidQuery = new DADroidQuery(sigFile);
                 if (sigFileVersion == null) {
                     setSigFileVersion(sigFile);
                 }
@@ -65,6 +65,8 @@ public class DADroid extends ToolBase {
         logger.debug("Droid.extractInfo starting on " + file.getName());
         long startTime = System.currentTimeMillis();
         IdentificationResultCollection results;
+        SubmissionGateway sg = new SubmissionGateway();
+
         try {
             results = droidQuery.queryFile(file);
         } catch (IOException e) {

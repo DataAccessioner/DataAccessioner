@@ -187,6 +187,8 @@ public class DADroidToolOutputter {
             out.write("\n");
             out.write("<signatureFileVersion>" + sigVersion + "</signatureFileVersion>");
             out.write("\n");
+            out.write("<extensionMismatch>" + String.valueOf(results.getExtensionMismatch()) + "</extensionMismatch>");
+            out.write("\n");
             out.write("</result>");
             out.write("\n");
         }
