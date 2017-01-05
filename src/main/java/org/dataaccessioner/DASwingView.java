@@ -1044,6 +1044,7 @@ public class DASwingView extends javax.swing.JFrame {
         
         @Override
         protected String doInBackground() throws Exception {
+            HashMap<String, String> daSwingMetadata = new HashMap<>();
             setStatusMsg("Preparing migration ...");
             statusPB.setIndeterminate(true);
             enable(false);
@@ -1055,7 +1056,10 @@ public class DASwingView extends javax.swing.JFrame {
             File accnMetadataFile = new File(accnRoot, accnNumTxt.getText()+".xml");
             destination = new File(accnDir, srcIdTxt.getText());
             destination.mkdirs();
-            MetadataManager mm = new MetadataManager(accnMetadataFile, collTitleTxt.getText(), accnNumTxt.getText());
+            daSwingMetadata.put("collectionName", collTitleTxt.getText());
+            daSwingMetadata.put("accessionNumber", accnNumTxt.getText());
+            daSwingMetadata.put("submitterName", nameTxt.getText());
+            MetadataManager mm = new MetadataManager(accnMetadataFile, daSwingMetadata );
             for(File annotatedFile: fileMetadata.keySet()){
                 if(annotatedFile == null){ //Oddly, the first key is always null
                     continue;

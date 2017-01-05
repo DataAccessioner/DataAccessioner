@@ -29,6 +29,7 @@ import org.openide.util.Exceptions;
 import javax.swing.*;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -66,13 +67,15 @@ public class DataAccessioner {
         //Default settings
         String collectionName = "";
         String accessionNumber = "";
+        String submitterName = "";
 
         Options options = new Options();
         options.addOption("c", true, "Collection Name");
         options.addOption("a", true, "Accession Number");
-        options.addOption("h", false, "print this message");
-        options.addOption("v", false, "print version information");
+        options.addOption("n", true, "Submitter name");
         options.addOption("u", false, "Do not start GUI; requires a source and destination");
+        options.addOption("v", false, "print version information");
+        options.addOption("h", false, "print this message");
 
         OptionGroup fitsOptions = new OptionGroup();
         fitsOptions.addOption(new Option("s", false, "Run FITS on source"));
@@ -95,6 +98,9 @@ public class DataAccessioner {
         }
         if (cmd.hasOption("a")) {
             accessionNumber = cmd.getOptionValue("a");
+        }
+        if (cmd.hasOption("n")) {
+            submitterName = cmd.getOptionValue("n");
         }
 
         try {
@@ -124,8 +130,8 @@ public class DataAccessioner {
         }
 
         if (cmd.hasOption("u")) {//Unattended
-            if (collectionName.isEmpty() || accessionNumber.isEmpty()) {
-                System.err.println("Both a collection name and an accession number must be provided if not using the GUI.");
+            if (collectionName.isEmpty() || accessionNumber.isEmpty() || submitterName.isEmpty()) {
+                System.err.println("A collection name, a submitter name, and an accession number must be provided if not using the GUI.");
                 printHelp(options);
             } else if (destination == null || !(destination.isDirectory() && destination.canWrite())) {
                 String destinationStr = "<blank>";
@@ -138,7 +144,11 @@ public class DataAccessioner {
                 System.err.println("Cannot run automatically. At least one valid source is required.");
                 printHelp(options);
             } else {
-                da.runUnattended(destination, sources, accessionNumber, collectionName);
+                HashMap<String, String> daCmdlnMetadata = new HashMap<>();
+                daCmdlnMetadata.put("collectionName", collectionName);
+                daCmdlnMetadata.put("accessionNumber", accessionNumber);
+                daCmdlnMetadata.put("submitterName", submitterName);
+                da.runUnattended(destination, sources, daCmdlnMetadata);
             }
 
         } else { //Start GUI
@@ -176,14 +186,14 @@ public class DataAccessioner {
         }
     }
 
-    private void runUnattended(File destination, List<File> sources, String accessionNumber, String collectionName) {
+    private void runUnattended(File destination, List<File> sources, HashMap<String, String> daCmdlnMetadata) {
 
         try {
+            String accessionNumber = daCmdlnMetadata.get("accessionNumber");
             File accnDir = new File(destination, accessionNumber);
             accnDir.mkdirs();
             File metadata = new File(accnDir, accessionNumber + ".xml");
-
-            metadataManager = new MetadataManager(metadata, collectionName, accessionNumber);
+            metadataManager = new MetadataManager(metadata, daCmdlnMetadata);
             metadataManager.open();
             migrator.setMetadataManager(metadataManager);
             migrator.setFits(fits);
@@ -212,6 +222,7 @@ public class DataAccessioner {
 
     private static void printHelp(Options opts) {
         HelpFormatter formatter = new HelpFormatter();
+        formatter.setOptionComparator(null);
         formatter.printHelp("dataAccessioner [options] [destination] [source] [additional sources...]", opts);
     }
 
