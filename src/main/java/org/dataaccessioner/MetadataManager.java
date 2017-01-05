@@ -38,10 +38,7 @@ import org.jdom.transform.XSLTransformer;
 import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  *
@@ -87,6 +84,8 @@ public class MetadataManager {
     private File metadataFile = null;
     private String collectionName = "";
     private String accessionNumber = "";
+    private String submitterName = "";
+    private String now = "";
     private HashMap<String, Metadata> annotatedFiles = new HashMap<String, Metadata>(); //Hash key is the file's absolute path
     
     public static String getName() {
@@ -94,11 +93,12 @@ public class MetadataManager {
     }
     private XSLTransformer transformer;
 
-    public MetadataManager(File metadataFile, String collectionName, String accessionNumber) {
+    public MetadataManager(File metadataFile, HashMap<String,String> daMetadata) {
         this.metadataFile = metadataFile;
-        this.collectionName = collectionName;
-        this.accessionNumber = accessionNumber;
-        
+        this.collectionName = daMetadata.get("collectionName");
+        this.accessionNumber = daMetadata.get("accessionNumber");
+        this.submitterName = daMetadata.get("submitterName");
+
         logger = Logger.getLogger(this.getClass());
         logger.setLevel(Level.INFO);
         BasicConfigurator.configure();
@@ -110,6 +110,9 @@ public class MetadataManager {
     }
     
     public void open() throws Exception {
+        Date rightNow  = new Date();
+        this.now = rightNow.toString();
+
         xmlFile = metadataFile;
         xmlFile.getParentFile().mkdirs(); //In case it doesn't exist
         if (!xmlFile.exists() || xmlFile.length() == 0) {
@@ -119,6 +122,9 @@ public class MetadataManager {
             Element accessionElement = new Element("accession", DEFAULT_NAMESPACE);
             accessionElement.setAttribute("number", accessionNumber);
             collection.addContent(accessionElement);
+            Element ingest_note = new Element("ingest_note", DEFAULT_NAMESPACE);
+            ingest_note.setText(collectionName + " transferred by " + submitterName + " on " + now);
+            accessionElement.addContent(ingest_note);
         } else {
             try {
                 document = new SAXBuilder().build(xmlFile);
