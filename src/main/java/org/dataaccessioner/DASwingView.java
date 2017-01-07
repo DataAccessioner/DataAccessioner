@@ -102,7 +102,12 @@ public class DASwingView extends javax.swing.JFrame {
     private DCTableModel dcEntriesTblModel = new DCTableModel(new ArrayList<Pair>());
     private JTable dcEntriesTbl = new JTable(dcEntriesTblModel);
     private JScrollPane dcEntriesSP = new JScrollPane(dcEntriesTbl);
-    
+
+    private JPanel notesPanel = new JPanel();
+    private JTabbedPane notesTP = new JTabbedPane();
+    private JTextArea abtSrcText = new JTextArea(5, 20);
+    private JTextArea addNotesText = new JTextArea(5, 20);
+
     private JPanel cmdBtnPanel = new JPanel();
     private JButton migrateBtn = new JButton("Migrate");
     private JButton cancelBtn = new JButton("Cancel");
@@ -453,6 +458,16 @@ public class DASwingView extends javax.swing.JFrame {
         srcItmSP.setDividerLocation(300);
         srcItmSP.setOrientation(JSplitPane.VERTICAL_SPLIT);
 
+        //About the Source/Additional Notes tabbed text entry panes
+        GroupLayout notesLayout = new GroupLayout(notesPanel);
+        notesPanel.setLayout(notesLayout);
+        notesTP.addTab("About the Source", abtSrcText);
+        notesTP.addTab("Additional Notes",addNotesText);
+        notesLayout.setHorizontalGroup(notesLayout.createParallelGroup()
+                .addComponent(notesTP));
+        notesLayout.setVerticalGroup(notesLayout.createParallelGroup()
+                .addComponent(notesTP));
+
         //Command Button Pane (fixed size, stuck to bottom)
         migrateBtn.addActionListener(new ActionListener() {
             @Override
@@ -511,6 +526,7 @@ public class DASwingView extends javax.swing.JFrame {
         mainLayout.setHorizontalGroup(mainLayout.createParallelGroup()
                 .addComponent(accnPanel)
                 .addComponent(srcItmSP)
+                .addComponent(notesPanel)
                 .addComponent(cmdBtnPanel)
                 .addComponent(statusPanel)
         );
@@ -518,6 +534,7 @@ public class DASwingView extends javax.swing.JFrame {
                 .addComponent(accnPanel)
                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(srcItmSP)
+                .addComponent(notesPanel)
                 .addComponent(cmdBtnPanel)
                 .addComponent(statusPanel)
         );
