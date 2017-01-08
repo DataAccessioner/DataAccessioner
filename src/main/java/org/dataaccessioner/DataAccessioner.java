@@ -68,11 +68,15 @@ public class DataAccessioner {
         String collectionName = "";
         String accessionNumber = "";
         String submitterName = "";
+        String srcNote = "";
+        String addNote = "";
 
         Options options = new Options();
-        options.addOption("c", true, "Collection Name");
-        options.addOption("a", true, "Accession Number");
-        options.addOption("n", true, "Submitter name");
+        options.addOption("c", true, "Collection Name (required if no GUI)");
+        options.addOption("a", true, "Accession Number (required if no GUI)");
+        options.addOption("n", true, "Submitter name (required if no GUI)");
+        options.addOption(Option.builder().hasArg().longOpt("about-srcnote").desc("Note about the source (optional)").argName("SRC NOTE").build());
+        options.addOption(Option.builder().hasArg().longOpt("add-note").desc("Additional note (optional)").argName("ADDL NOTE").build());
         options.addOption("u", false, "Do not start GUI; requires a source and destination");
         options.addOption("v", false, "print version information");
         options.addOption("h", false, "print this message");
@@ -101,6 +105,12 @@ public class DataAccessioner {
         }
         if (cmd.hasOption("n")) {
             submitterName = cmd.getOptionValue("n");
+        }
+        if (cmd.hasOption("about-srcnote")) {
+            srcNote = cmd.getOptionValue("about-srcnote");
+        }
+        if (cmd.hasOption("add-note")) {
+            addNote = cmd.getOptionValue("add-note");
         }
 
         try {
@@ -148,6 +158,8 @@ public class DataAccessioner {
                 daCmdlnMetadata.put("collectionName", collectionName);
                 daCmdlnMetadata.put("accessionNumber", accessionNumber);
                 daCmdlnMetadata.put("submitterName", submitterName);
+                daCmdlnMetadata.put("aboutSourceNote", srcNote);
+                daCmdlnMetadata.put("addNote", addNote);
                 da.runUnattended(destination, sources, daCmdlnMetadata);
             }
 
