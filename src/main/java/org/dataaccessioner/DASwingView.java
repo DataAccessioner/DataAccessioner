@@ -455,7 +455,7 @@ public class DASwingView extends javax.swing.JFrame {
         //Source/Item Split Pane (variable size, expand to fill)
         srcItmSP.setTopComponent(srcPanel);
         srcItmSP.setBottomComponent(dcPanel);
-        srcItmSP.setDividerLocation(300);
+        srcItmSP.setDividerLocation(210);
         srcItmSP.setOrientation(JSplitPane.VERTICAL_SPLIT);
 
         //About the Source/Additional Notes tabbed text entry panes
@@ -466,7 +466,7 @@ public class DASwingView extends javax.swing.JFrame {
         notesLayout.setHorizontalGroup(notesLayout.createParallelGroup()
                 .addComponent(notesTP));
         notesLayout.setVerticalGroup(notesLayout.createParallelGroup()
-                .addComponent(notesTP));
+                .addComponent(notesTP, 110, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE));
 
         //Command Button Pane (fixed size, stuck to bottom)
         migrateBtn.addActionListener(new ActionListener() {
