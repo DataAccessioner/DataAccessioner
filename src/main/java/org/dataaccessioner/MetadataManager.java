@@ -54,7 +54,7 @@ public class MetadataManager {
     private static File xmlFile;
     private static Document document;
     private static Element currentElement;
-    private static final Namespace DEFAULT_NAMESPACE = Namespace.getNamespace("http://dataaccessioner.org/schema/dda-0-3-1");
+    private static final Namespace DEFAULT_NAMESPACE = Namespace.getNamespace("http://dataaccessioner.org/schema/dda-1-1");
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
     
     private static final Namespace DC_NAMESPACE = Namespace.getNamespace("dc","http://purl.org/dc/elements/1.1/");
@@ -85,6 +85,8 @@ public class MetadataManager {
     private String collectionName = "";
     private String accessionNumber = "";
     private String submitterName = "";
+    private String srcNote = "";
+    private String addNote = "";
     private String now = "";
     private HashMap<String, Metadata> annotatedFiles = new HashMap<String, Metadata>(); //Hash key is the file's absolute path
     
@@ -98,6 +100,8 @@ public class MetadataManager {
         this.collectionName = daMetadata.get("collectionName");
         this.accessionNumber = daMetadata.get("accessionNumber");
         this.submitterName = daMetadata.get("submitterName");
+        this.srcNote = daMetadata.get("aboutSourceNote");
+        this.addNote = daMetadata.get("addNote");
 
         logger = Logger.getLogger(this.getClass());
         logger.setLevel(Level.INFO);
@@ -125,6 +129,16 @@ public class MetadataManager {
             Element ingest_note = new Element("ingest_note", DEFAULT_NAMESPACE);
             ingest_note.setText(collectionName + " transferred by " + submitterName + " on " + now);
             accessionElement.addContent(ingest_note);
+            if (! srcNote.isEmpty()) {
+                Element source_note = new Element("source_note", DEFAULT_NAMESPACE);
+                source_note.setText(srcNote);
+                accessionElement.addContent(source_note);
+            }
+            if (! addNote.isEmpty()) {
+                Element add_notes = new Element("additional_notes", DEFAULT_NAMESPACE);
+                add_notes.setText(addNote);
+                accessionElement.addContent(add_notes);
+            }
         } else {
             try {
                 document = new SAXBuilder().build(xmlFile);

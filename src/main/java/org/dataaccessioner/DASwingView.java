@@ -560,8 +560,13 @@ public class DASwingView extends javax.swing.JFrame {
             accnNumTxt.setText("");
             accnDirTxt.setText("");
             collTitleTxt.setText("");
+
             //Clear Source
             clearSource(false);
+
+            //Clear notes
+            addNotesText.setText("");
+            abtSrcText.setText("");
         }
     }
     
@@ -1076,6 +1081,8 @@ public class DASwingView extends javax.swing.JFrame {
             daSwingMetadata.put("collectionName", collTitleTxt.getText());
             daSwingMetadata.put("accessionNumber", accnNumTxt.getText());
             daSwingMetadata.put("submitterName", nameTxt.getText());
+            daSwingMetadata.put("aboutSourceNote", abtSrcText.getText());
+            daSwingMetadata.put("addNote", addNotesText.getText());
             MetadataManager mm = new MetadataManager(accnMetadataFile, daSwingMetadata );
             for(File annotatedFile: fileMetadata.keySet()){
                 if(annotatedFile == null){ //Oddly, the first key is always null
