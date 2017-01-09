@@ -37,12 +37,14 @@
                 <premis:formatRegistryName>http://www.nationalarchives.gov.uk/pronom</premis:formatRegistryName>
                 <premis:formatRegistryKey><xsl:value-of select="fits:externalIdentifier" /></premis:formatRegistryKey>
               </premis:formatRegistry>
-              <premis:formatNote>DROID Signature File Version: <xsl:value-of select="../../fits:toolOutput/fits:tool[@name='Droid']/results/(result)[1]/signatureFileVersion" /></premis:formatNote>
+            </xsl:if>
+            <premis:formatNote><xsl:value-of select="@mimetype" /></premis:formatNote>
+            <xsl:if test="fits:externalIdentifier/@toolname='Droid'">
               <xsl:if test="../../fits:toolOutput/fits:tool[@name='Droid']/results/(result)[1]/extensionMismatch[text()='true']">
                 <premis:formatNote>DROID Identification Warning: Possible file extension mismatch</premis:formatNote>
               </xsl:if>
+              <premis:formatNote>DROID Signature File Version: <xsl:value-of select="../../fits:toolOutput/fits:tool[@name='Droid']/results/(result)[1]/signatureFileVersion" /></premis:formatNote>
             </xsl:if>
-              <premis:formatNote><xsl:value-of select="@mimetype" /></premis:formatNote>
             <xsl:for-each select="fits:tool">
               <premis:formatNote>Identified by: <xsl:value-of select="@toolname"/><xsl:text> v</xsl:text><xsl:value-of select="@toolversion"/></premis:formatNote>
             </xsl:for-each>
