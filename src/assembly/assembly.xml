@@ -20,6 +20,13 @@
       <directory>src/main/resources/xml</directory>
       <outputDirectory>/xml</outputDirectory>
     </fileSet>
+    <fileSet>
+      <directory>.</directory>
+      <outputDirectory>logs</outputDirectory>
+      <excludes>
+        <exclude>*/**</exclude>
+      </excludes>
+    </fileSet>
   </fileSets>
   <files>
     <file>

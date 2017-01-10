@@ -38,7 +38,11 @@ import org.jdom.transform.XSLTransformer;
 import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -152,7 +156,8 @@ public class MetadataManager {
                 .getChild("accession", DEFAULT_NAMESPACE);
     }
     
-    public void close() {
+    public void close(long elapsedTime) {
+        setElapsedTime(elapsedTime);
         FileOutputStream stream = null;
         OutputStreamWriter osw = null;
         PrintWriter output = null;
@@ -176,6 +181,29 @@ public class MetadataManager {
                         + xmlFile.getName() + ": " + ex.getMessage());
             }
         }
+    }
+
+    private void setElapsedTime(long elapsedTime) {
+        Element ingestTime = new Element("ingest_time", DEFAULT_NAMESPACE);
+        ingestTime.setText(getDuration(elapsedTime));
+        Element parent = document.getRootElement()
+                .getChild("accession", DEFAULT_NAMESPACE);
+        Element ingestNote = parent.getChild("ingest_note", DEFAULT_NAMESPACE);
+        int index = parent.indexOf(ingestNote);
+        if (index > -1) {
+            parent.addContent(index + 1, ingestTime);
+        }else {
+            parent.addContent(ingestTime);
+        }
+    }
+
+    public String getDuration(long elapsedTime) {
+        String hhmmssms = String.format("%02d:%02d:%02d.%03d",
+                TimeUnit.MILLISECONDS.toHours(elapsedTime),
+                TimeUnit.MILLISECONDS.toMinutes(elapsedTime) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(elapsedTime)),
+                TimeUnit.MILLISECONDS.toSeconds(elapsedTime) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(elapsedTime)),
+                elapsedTime - TimeUnit.MILLISECONDS.toSeconds(elapsedTime));
+        return hhmmssms;
     }
 
     public void cancel() {

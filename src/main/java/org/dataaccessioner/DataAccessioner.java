@@ -21,9 +21,8 @@ package org.dataaccessioner;
 import edu.harvard.hul.ois.fits.Fits;
 import edu.harvard.hul.ois.fits.exceptions.FitsException;
 import org.apache.commons.cli.*;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 import org.openide.util.Exceptions;
 
 import javax.swing.*;
@@ -48,10 +47,10 @@ public class DataAccessioner {
     private Migrator migrator = new Migrator();
 
     public DataAccessioner() {
-        System.setProperty("log4j.configuration", Fits.FITS_TOOLS_DIR + "log4j.properties");
+        System.setProperty("log4j.configuration", "tools/log4j.properties");
         logger = Logger.getLogger(this.getClass());
-        BasicConfigurator.configure();
-        logger.setLevel(Level.INFO);
+        PropertyConfigurator.configure("tools/log4j.properties");
+        logger.info("Starting Data Accessioner application.");
 
         //May eventually setup some other configuration stuff here.
         //FITS is not initialized here because it takes some time to start
@@ -70,6 +69,7 @@ public class DataAccessioner {
         String submitterName = "";
         String srcNote = "";
         String addNote = "";
+        String runTime = "";
 
         Options options = new Options();
         options.addOption("c", true, "Collection Name (required if no GUI)");
@@ -213,12 +213,15 @@ public class DataAccessioner {
             for (File source : sources) {
                 File sourceDestination = new File(accnDir, source.getName());
                 sourceDestination.mkdirs();
+
                 switch (migrator.run(source, sourceDestination)) {
                     case Migrator.STATUS_FAILURE:
+                        logger.info("Migration failed: " + migrator.getStatusMessage());
                         System.err.println("Migration failed! "
                                 + migrator.getStatusMessage());
                         break;
                     case Migrator.STATUS_SUCCESS:
+                        logger.info("Migration completed successfully!");
                         System.out.println("Migration completed successfully!");
                 }
 

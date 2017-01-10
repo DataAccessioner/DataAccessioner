@@ -22,21 +22,14 @@ import com.twmacinta.util.MD5;
 import edu.harvard.hul.ois.fits.Fits;
 import edu.harvard.hul.ois.fits.FitsOutput;
 import edu.harvard.hul.ois.fits.exceptions.FitsException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
+import org.openide.util.Exceptions;
+
+import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import org.openide.util.Exceptions;
+import java.util.*;
 
 /**
  *
@@ -56,6 +49,7 @@ public class Migrator {
 
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
+    private static Logger logger;
     private String statusMessage = "";
     private int status = STATUS_INITIALIZING;
     private List<String> warnings = new ArrayList<String>();
@@ -69,7 +63,9 @@ public class Migrator {
     private HashSet excludedItems = new HashSet(); //Hash key is the file's absolute path
 
     public Migrator() {
-        
+        System.setProperty("log4j.configuration", "tools/log4j.properties");
+        logger = Logger.getLogger(this.getClass());
+        PropertyConfigurator.configure("tools/log4j.properties");
     }
 
     public void setFits(Fits fits) {
@@ -127,9 +123,15 @@ public class Migrator {
             return STATUS_FAILURE;
         }
         try {
+            long startTime = System.currentTimeMillis();
             status = STATUS_RUNNING;
+            logger.info("Starting migration for: " + source.getPath());
             status = processDirectory(source, destination);
-            metadataManager.close();
+            logger.info("Finished migration for: " + source.getPath());
+            long endTime = System.currentTimeMillis();
+            long elapsedTime = endTime - startTime;
+            metadataManager.close(elapsedTime);
+            logger.info("Migration running time: " + metadataManager.getDuration(elapsedTime));
         } catch (FileNotFoundException ex) {
             setStatusMessage(ex.getLocalizedMessage());
             warnings.add(statusMessage);
@@ -300,6 +302,7 @@ public class Migrator {
 
                 FitsOutput fout = fits.examine(toProcess);
                 System.out.println(statusMessage);
+                logger.info(statusMessage);
                 metadataManager.addDocumentXSLT(fout.getFitsXml());
             } catch (FitsException ex) {
                 Exceptions.printStackTrace(ex);
