@@ -20,6 +20,7 @@
   <xs:element name="source_note" type="xs:string" />
   <xs:element name="additional_notes" type="xs:string" />
   <xs:element name="note" type="xs:string" />
+  <xs:element name="ingest_time" type="xs:time" />
 
   <!-- Complex Types -->
 
@@ -36,6 +37,7 @@
     <xs:complexType>
       <xs:choice maxOccurs="unbounded" minOccurs="0">
         <xs:element ref="ingest_note" maxOccurs="1" minOccurs="0" />
+        <xs:element ref="ingest_time" maxOccurs="1" minOccurs="0" />
         <xs:element ref="source_note" maxOccurs="1" minOccurs="0" />
         <xs:element ref="additional_notes" maxOccurs="1" minOccurs="0" />
       </xs:choice>
