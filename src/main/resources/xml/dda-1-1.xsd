@@ -40,10 +40,10 @@
         <xs:element ref="ingest_time" maxOccurs="1" minOccurs="0" />
         <xs:element ref="source_note" maxOccurs="1" minOccurs="0" />
         <xs:element ref="additional_notes" maxOccurs="1" minOccurs="0" />
+        <xs:sequence minOccurs="0" maxOccurs="unbounded">
+          <xs:element ref="folder"/>
+        </xs:sequence>
       </xs:choice>
-      <xs:sequence>
-        <xs:element ref="folder"/>
-      </xs:sequence>
       <xs:attribute name="number" type="xs:string"/>
     </xs:complexType>
   </xs:element>
