@@ -1,1 +1,0 @@
-java -Xmx512m -jar DataAccessioner.jar

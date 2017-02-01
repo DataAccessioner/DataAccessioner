@@ -1,6 +1,10 @@
-*.class
+.*.swp
 
-#NetBeans Specific
+# Maven
+target/
+dependency-reduced-pom.xml
+
+# NetBeans
 nbproject/private/
 build/
 nbbuild/
@@ -8,3 +12,7 @@ dist/
 nbdist/
 nbactions.xml
 nb-configuration.xml
+
+# IntelliJ
+.idea/
+*.iml

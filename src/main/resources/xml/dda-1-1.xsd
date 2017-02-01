@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns="http://dataaccessioner.org/schema/dda-1-1" targetNamespace="http://dataaccessioner.org/schema/dda-1-1" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+
+  <!-- Custom Types -->
+  <xs:complexType name="QualifiedElement">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="qualifier" type="xs:string">
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <!-- QualifiedElement Types -->
+  <xs:element name="description" type="QualifiedElement" />
+  <xs:element name="title" type="QualifiedElement" />
+
+  <!-- Simple Types -->
+  <xs:element name="ingest_note" type="xs:string" />
+  <xs:element name="source_note" type="xs:string" />
+  <xs:element name="additional_notes" type="xs:string" />
+  <xs:element name="note" type="xs:string" />
+  <xs:element name="ingest_time" type="xs:time" />
+
+  <!-- Complex Types -->
+
+  <xs:element name="collection">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="accession"/>
+      </xs:sequence>
+      <xs:attribute name="name" type="xs:string" />
+      <xs:attribute name="number" type="xs:string" />
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="accession">
+    <xs:complexType>
+      <xs:choice maxOccurs="unbounded" minOccurs="0">
+        <xs:element ref="ingest_note" maxOccurs="1" minOccurs="0" />
+        <xs:element ref="ingest_time" maxOccurs="1" minOccurs="0" />
+        <xs:element ref="source_note" maxOccurs="1" minOccurs="0" />
+        <xs:element ref="additional_notes" maxOccurs="1" minOccurs="0" />
+        <xs:sequence minOccurs="0" maxOccurs="unbounded">
+          <xs:element ref="folder"/>
+        </xs:sequence>
+      </xs:choice>
+      <xs:attribute name="number" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="folder">
+    <xs:complexType>
+      <xs:choice maxOccurs="unbounded" minOccurs="0">
+        <xs:element ref="description"/>
+        <xs:element ref="title"/>
+        <xs:element ref="file"/>
+        <xs:element ref="folder"/>
+        <xs:element ref="note" />
+      </xs:choice>
+      <xs:attribute name="last_modified" type="xs:dateTime"/>
+      <xs:attribute name="name" type="xs:string" use="required"/>
+      <xs:attribute name="hidden" type="xs:boolean" />
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="file">
+    <xs:complexType>
+      <xs:choice maxOccurs="unbounded">
+        <!-- Adapters can dump whatever well-formed code they want here -->
+        <xs:any namespace="##any" minOccurs="0" processContents="lax"/> 
+      </xs:choice>
+      <xs:attribute name="MD5" type="xs:string"/>
+      <xs:attribute name="SHA256" type="xs:string"/>
+      <xs:attribute name="CRC32" type="xs:string"/>
+      <xs:attribute name="last_modified" type="xs:dateTime" use="required"/>
+      <xs:attribute name="name" type="xs:string" use="required"/>
+      <xs:attribute name="size" type="xs:nonNegativeInteger" use="required"/>
+      <xs:attribute name="hidden" type="xs:boolean" />
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

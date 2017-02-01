@@ -1,0 +1,39 @@
+# This is currently used by Tika and DROID
+# Mapping from format names to standard names. This is an incomplete map,
+# holding only cases where conversion is necessary. Expand as needed.
+MPEG-1 Audio Layer 3=MPEG 1/2 Audio Layer 3
+OpenDocument v1.0: Presentation document=OpenDocument Presentation
+OpenDocument v1.0: Text document=OpenDocument Text
+OpenDocument v1.0: Spreadsheet document=OpenDocument Spreadsheet
+OpenDocument v1.0: Formula document=OpenDocument Formula
+OpenDocument v1.0: Graphics document (Drawing)=OpenDocument Graphics
+OpenDocument v1.0: Global Text document=OpenDocument Master Document
+Waveform Audio (PCMWAVEFORMAT)=Waveform Audio
+Waveform Audio (WAVEFORMATEX)=Waveform Audio
+Broadcast WAVE=Waveform Audio
+Joint Photographic Experts Group=jpeg
+Gzip Compressed Archive=GZIP Format
+Windows bitmap=Windows Bitmap
+PPT=Microsoft Powerpoint Presentation
+Plain Text File=Plain text
+Scalable Vector Graphics=Scalable Vector Graphics (SVG)
+Microsoft Excel Spreadsheet=Microsoft Excel
+Audio Video Interleave File=Audio/Video Interleaved Format
+Photoshop Image=Adobe Photoshop
+Macromedia FLV=Flash Video (FLV)
+Digital Negative Format (DNG)=Digital Negative (DNG)
+Rich Text Format=Rich Text Format (RTF)
+ePub format=EPUB
+Electronic Publication=EPUB
+WordPerfect for MS-DOS/Windows Document=WordPerfect Document
+WordPerfect for MS-DOS Document=WordPerfect Document
+WordPerfect for Windows Document=WordPerfect Document
+Microsoft Word Document=Microsoft Word Binary File Format
+Microsoft Word for Windows Document=Microsoft Word Binary File Format
+Microsoft Word 2 Document=Microsoft Word Binary File Format
+Microsoft Word 5 Document=Microsoft Word Binary File Format
+Microsoft Word for Macintosh Document=Microsoft Word Binary File Format
+Material Exchange Format=Material Exchange Format (MXF)
+Microsoft Office Open XML=Office Open XML Document
+Office Open XML Document (macro-enabled)=Office Open XML Document (Macros Enabled)
+Comma Separated Values=Comma-Separated Values (CSV)
