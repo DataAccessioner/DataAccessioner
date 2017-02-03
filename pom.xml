@@ -33,7 +33,6 @@
     <repository>
       <id>dataaccessioner.org</id>
       <name>Data Accessioner Maven Repository</name>
-      <url>scp://saez.library.wisc.edu/var/www/html/maven2</url>
     </repository>
   </distributionManagement>
 
