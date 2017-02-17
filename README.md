@@ -65,9 +65,10 @@ an open source application, unaffiliated to any institution.
 Version 1.0 is the first version to use FITS as a metadata tool 
 wrapper.
 
-Version 1.1 was made possible by the Archives of the Episcopal
-Church of America.  It was refactored to use Maven to manage 
-dependencies, and contains several minor enhancements.
+Version 1.1 was made possible by The Archives of the Episcopal
+Church (http://www.episcopalarchives.org).  It was refactored 
+to use Maven to manage dependencies, and contains several minor 
+enhancements.
 
 ## Credits
 
