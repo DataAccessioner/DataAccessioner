@@ -11,6 +11,7 @@
     <fileSet>
       <directory>src/bin</directory>
       <outputDirectory>/</outputDirectory>
+      <fileMode>0755</fileMode>
     </fileSet>
     <fileSet>
       <directory>src/main/resources/tools</directory>
@@ -33,6 +34,7 @@
       <source>target/${artifactId}-${version}.${packaging}</source>
       <outputDirectory>dataaccessioner-${version}</outputDirectory>
       <destName>${artifactId}.${packaging}</destName>
+      <fileMode>0755</fileMode>
     </file>
     <file>
       <source>src/main/resources/README.md</source>
