@@ -95,6 +95,7 @@ public class DASwingView extends javax.swing.JFrame {
     private JComboBox dcElementsCB = new JComboBox();
     private JLabel dcValueLbl = new JLabel("Metadata Value");
     private JTextArea dcValueTxtA = new JTextArea(5, 20);
+
     private JScrollPane dcValueSP = new JScrollPane(dcValueTxtA);
     private JButton addDCBtn = new JButton("Add New");
     private JButton rmvDCBtn = new JButton("Remove Selected");
@@ -205,6 +206,13 @@ public class DASwingView extends javax.swing.JFrame {
         Dimension preferredSize = new Dimension(500,768);
         this.setPreferredSize(preferredSize);
         this.setSize(preferredSize);
+
+        dcValueTxtA.setLineWrap(true);
+        dcValueTxtA.setWrapStyleWord(true);
+        abtSrcText.setLineWrap(true);
+        abtSrcText.setWrapStyleWord(true);
+        addNotesText.setLineWrap(true);
+        addNotesText.setWrapStyleWord(true);
         
         //Stand-alone Action Listeners
         ActionListener clearAllListen = new ActionListener() {
