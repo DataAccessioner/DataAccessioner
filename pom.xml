@@ -72,7 +72,7 @@
     <stax2.version>3.0.1</stax2.version>
     <staxmate.version>2.0.0</staxmate.version>
     <woodstox.version>4.0.7</woodstox.version>
-    <xerces.version>2.9.1</xerces.version>
+    <xerces.version>2.12.2</xerces.version>
 
     <!-- DROID tool version -->
     <droid.version>6.1.5</droid.version>
