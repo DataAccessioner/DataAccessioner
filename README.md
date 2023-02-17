@@ -1,3 +1,5 @@
+**Note:** *As of the beginning of 2023 the Data Accessioner project no longer has any active developers maintaining it.*
+
 # Data Accessioner
 
 The DataAccessioner is a simple Java Swing GUI to allow archivists 
@@ -9,8 +11,6 @@ It provides a a wrapper around the FITS toolkit
 (<http://projects.iq.harvard.edu/fits/home>) to integrate common 
 metadata tools to analyze and describe found content at the time 
 of migration.
-
-Home: <http://www.dataaccessioner.org>
 
 ## Build prerequisites
 
