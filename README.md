@@ -1,4 +1,5 @@
-**Note:** *As of the beginning of 2023 the Data Accessioner project no longer has any active developers maintaining it.*
+**Note:** *As of February 2024 the [Data Accessioner project](https://github.com/digitalpowrr/DataAccessioner) 
+is maintained by [DigitalPOWRR](https://digitalpowrr.niu.edu/).*
 
 # Data Accessioner
 
